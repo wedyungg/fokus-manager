@@ -54,6 +54,13 @@
         >
           <IconDollarSign class="w-4 h-4 mr-1.5" /> Finansial
         </button>
+        <button 
+          @click="activeTab = 'drive'"
+          class="snap-start whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center"
+          :class="activeTab === 'drive' ? 'bg-foreground text-background shadow-subtle' : 'bg-muted text-muted-foreground hover:bg-muted/80'"
+        >
+          <IconLink class="w-4 h-4 mr-1.5" /> Link Drive
+        </button>
         <NuxtLink 
           to="/references"
           class="snap-start whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-all flex items-center"
@@ -295,52 +302,57 @@
           </div>
         </div>
       </div>
-      
-      <!-- Complete Order Button -->
-      <div v-if="order && order.status !== 'done'" class="mt-8 pt-4 border-t border-border">
-        <button 
-          @click="showCompleteModal = true"
-          class="w-full py-4 bg-foreground text-background rounded-2xl font-bold tracking-wide hover:bg-foreground/90 transition-all flex justify-center items-center shadow-lg active:scale-[0.98]"
-        >
-          <IconCheckCircle2 class="w-5 h-5 mr-2" /> SELESAIKAN ORDER
-        </button>
-      </div>
-
-    </template>
-    
-    <!-- Completion Modal -->
-    <div v-if="showCompleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-      <div class="bg-background border border-border rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div class="p-6">
-          <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
-            <IconCheckCircle2 class="w-6 h-6 text-green-600 dark:text-green-400" />
+      <div v-else-if="activeTab === 'drive'" class="space-y-6">
+        <div class="bg-background border border-border p-5 rounded-2xl shadow-subtle space-y-4">
+          <div class="flex justify-between items-center border-b border-border pb-4 mb-4">
+            <h3 class="font-serif text-lg font-semibold">Generate Link Klien</h3>
           </div>
-          <h3 class="text-xl font-serif font-bold mb-1">Selesaikan Order</h3>
-          <p class="text-sm text-muted-foreground mb-6">Masukkan link Google Drive hasil foto untuk men-generate link pemilihan klien via GAS.</p>
           
+          <div v-if="order?.client_selection_link" class="mb-6 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-900/50">
+             <p class="text-sm text-blue-800 dark:text-blue-300 mb-2 font-medium">Link Pemilihan Klien Aktif:</p>
+             <div class="flex items-center gap-2">
+               <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-white dark:bg-black/20 border border-blue-200 dark:border-blue-800 text-xs px-3 py-2 rounded-lg text-muted-foreground outline-none cursor-text select-all" />
+               <button @click="copyLink(order.client_selection_link)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shadow-sm active:scale-95">
+                 {{ copied ? 'Tersalin!' : 'Copy' }}
+               </button>
+             </div>
+          </div>
+
           <div class="space-y-4">
             <div>
-              <label class="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Link Google Drive</label>
+              <label class="block text-sm font-medium mb-1">Link Google Drive Baru / Update</label>
               <input v-model="completionForm.driveLink" type="text" placeholder="https://drive.google.com/drive/folders/..." class="w-full px-4 py-3 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all" />
             </div>
             <div>
-              <label class="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Kuota Pilih Foto</label>
+              <label class="block text-sm font-medium mb-1">Kuota Pilih Foto</label>
               <input v-model.number="completionForm.maxSelections" type="number" placeholder="50" class="w-full px-4 py-3 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all" />
             </div>
           </div>
           
-          <div class="mt-8 flex gap-3">
-            <button @click="showCompleteModal = false" class="flex-1 py-3 bg-muted text-foreground rounded-xl font-medium hover:bg-muted/80 transition-colors">
-              Batal
-            </button>
-            <button @click="submitCompletion" :disabled="completingOrder || !completionForm.driveLink || !completionForm.maxSelections" class="flex-1 py-3 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+          <div class="pt-4">
+            <button 
+              @click="submitCompletion" 
+              :disabled="completingOrder || !completionForm.driveLink || !completionForm.maxSelections"
+              class="w-full py-3 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed"
+            >
               <span v-if="completingOrder" class="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2"></span>
-              {{ completingOrder ? 'Proses...' : 'Selesai' }}
+              {{ completingOrder ? 'Memproses...' : 'Generate / Update Link' }}
             </button>
           </div>
         </div>
       </div>
-    </div>
+      
+      <!-- Complete Order Button -->
+      <div v-if="order && order.status !== 'done'" class="mt-8 pt-4 border-t border-border">
+        <button 
+          @click="markOrderDone"
+          class="w-full py-4 bg-foreground text-background rounded-2xl font-bold tracking-wide hover:bg-foreground/90 transition-all flex justify-center items-center shadow-lg active:scale-[0.98]"
+        >
+          <IconCheckCircle2 class="w-5 h-5 mr-2" /> TANDAI TELAH SELESAI
+        </button>
+      </div>
+
+    </template>
   </div>
 </template>
 
@@ -379,7 +391,6 @@ const loading = ref(true)
 const savingFinance = ref(false)
 const activeTab = ref('shotlist')
 
-const showCompleteModal = ref(false)
 const completingOrder = ref(false)
 const completionForm = ref({
   driveLink: '',
@@ -590,7 +601,6 @@ const submitCompletion = async () => {
     const { error } = await supabase
       .from('orders')
       .update({ 
-        status: 'done',
         drive_link: link,
         max_selections: completionForm.value.maxSelections,
         client_selection_link: finalGasLink
@@ -601,18 +611,33 @@ const submitCompletion = async () => {
     
     // Update local state
     if (order.value) {
-      order.value.status = 'done'
       order.value.drive_link = link
       order.value.max_selections = completionForm.value.maxSelections
       order.value.client_selection_link = finalGasLink
     }
     
-    showCompleteModal.value = false
+    alert('Link berhasil digenerate dan disimpan!')
   } catch (e) {
-    alert('Gagal menyelesaikan order: ' + e.message)
+    alert('Gagal generate link: ' + e.message)
     console.error(e)
   } finally {
     completingOrder.value = false
+  }
+}
+
+const markOrderDone = async () => {
+  if (!confirm('Yakin ingin menandai order ini sebagai selesai?')) return
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: 'done' })
+      .eq('id', orderId)
+      
+    if (error) throw error
+    if (order.value) order.value.status = 'done'
+    alert('Order berhasil ditandai selesai!')
+  } catch (e) {
+    alert('Gagal menyelesaikan order: ' + e.message)
   }
 }
 

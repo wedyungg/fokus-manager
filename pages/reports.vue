@@ -20,19 +20,18 @@
 
     <template v-else>
       <!-- Global Report Card -->
-      <div class="bg-gradient-to-br from-neutral-800 to-neutral-900 dark:from-neutral-800/80 dark:to-neutral-900/80 text-white rounded-3xl p-6 shadow-2xl relative overflow-hidden border border-neutral-700/50">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-        <p class="text-white/60 text-sm font-medium mb-1">Total Net Profit</p>
-        <h3 class="text-4xl font-serif font-bold mb-6 tracking-tight text-white">{{ formatCurrency(totals.netProfit) }}</h3>
+      <div class="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-neutral-800 dark:to-neutral-900 text-foreground rounded-3xl p-6 shadow-subtle relative overflow-hidden border border-border">
+        <p class="text-muted-foreground text-sm font-medium mb-1">Total Net Profit</p>
+        <h3 class="text-4xl font-serif font-bold mb-6 tracking-tight text-foreground">{{ formatCurrency(totals.netProfit) }}</h3>
         
-        <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
+        <div class="grid grid-cols-2 gap-4 border-t border-border pt-4">
           <div>
-            <p class="text-white/50 text-xs font-medium mb-1">Total Omzet (Bruto)</p>
-            <p class="font-semibold text-white/90">{{ formatCurrency(totals.gross) }}</p>
+            <p class="text-muted-foreground text-xs font-medium mb-1">Total Omzet (Bruto)</p>
+            <p class="font-semibold text-foreground">{{ formatCurrency(totals.gross) }}</p>
           </div>
           <div>
-            <p class="text-white/50 text-xs font-medium mb-1">Total Operasional</p>
-            <p class="font-semibold text-white/90">{{ formatCurrency(totals.expenses) }}</p>
+            <p class="text-muted-foreground text-xs font-medium mb-1">Total Operasional</p>
+            <p class="font-semibold text-foreground">{{ formatCurrency(totals.expenses) }}</p>
           </div>
         </div>
       </div>
@@ -171,12 +170,12 @@ const chartData = computed(() => {
       {
         label: 'Net Profit',
         data: dailyProfits,
-        borderColor: '#171717', // Foreground color
-        backgroundColor: 'rgba(23, 23, 23, 0.1)',
+        borderColor: '#3b82f6', // Safe blue color for both themes
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderWidth: 2,
         tension: 0.3,
         fill: true,
-        pointBackgroundColor: '#171717',
+        pointBackgroundColor: '#3b82f6',
         pointRadius: 3
       }
     ]

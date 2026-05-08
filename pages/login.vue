@@ -99,7 +99,7 @@ const handleLogin = async () => {
       throw error
     }
     
-    await navigateTo('/orders')
+    await navigateTo('/', { replace: true })
   } catch (error) {
     errorMsg.value = error.message
   } finally {

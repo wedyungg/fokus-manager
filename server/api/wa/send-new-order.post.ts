@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
     return { success: false, error: 'WA_GROUP_ID belum dikonfigurasi di .env' }
   }
 
-  const { client_name, service_type, event_date, client_phone, location } = body
+  const { client_name, service_type, event_date, client_phone, location, time_start, time_finish } = body
 
   // Format tanggal ke bahasa Indonesia
   const formattedDate = new Date(event_date).toLocaleDateString('id-ID', {
@@ -33,6 +33,7 @@ export default defineEventHandler(async (event) => {
 *Klien:* ${client_name}
 *Layanan:* ${service_type}
 *Tanggal:* ${formattedDate}
+*Waktu:* ${time_start && time_finish ? time_start + ' - ' + time_finish : '-'}
 *Lokasi:* ${location || '-'}
 
 📞 Hubungi Klien: ${cleanPhone}

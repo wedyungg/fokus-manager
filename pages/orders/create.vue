@@ -92,17 +92,40 @@
           <p class="text-[11px] text-muted-foreground mt-1">Format internasional tanpa tanda +. Contoh: 6281234567890</p>
         </div>
 
-        <!-- Lokasi Acara -->
-        <div>
-          <label class="block text-sm font-medium mb-1">Lokasi Acara</label>
-          <div class="relative">
-            <IconMapPin class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
-            <input 
-              v-model="form.location" 
-              type="text" 
-              placeholder="Gedung Sasana Kriya, Surabaya"
-              class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
-            />
+        <!-- Lokasi Acara & Waktu -->
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Lokasi Acara</label>
+            <div class="relative">
+              <IconMapPin class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
+              <input 
+                v-model="form.location" 
+                type="text" 
+                placeholder="Gedung Sasana Kriya, Surabaya"
+                class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Waktu Mulai & Selesai</label>
+            <div class="flex gap-4">
+              <div class="flex-1 relative">
+                <IconClock class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
+                <input 
+                  v-model="form.time_start" 
+                  type="time" 
+                  class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all appearance-none cursor-pointer text-foreground"
+                />
+              </div>
+              <div class="flex-1 relative">
+                <IconClock class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
+                <input 
+                  v-model="form.time_finish" 
+                  type="time" 
+                  class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all appearance-none cursor-pointer text-foreground"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -126,7 +149,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useSupabaseClient, useSupabaseUser, navigateTo } from '#imports'
-import { Calendar as IconCalendar, Phone as IconPhone, MapPin as IconMapPin } from 'lucide-vue-next'
+import { Calendar as IconCalendar, Phone as IconPhone, MapPin as IconMapPin, Clock as IconClock } from 'lucide-vue-next'
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
@@ -137,7 +160,9 @@ const form = ref({
   service_type: '',
   sessions: [],
   client_phone: '',
-  location: ''
+  location: '',
+  time_start: '',
+  time_finish: ''
 })
 
 const showDatePicker = ref(false)
@@ -175,11 +200,13 @@ const submitOrder = async () => {
       .from('orders')
       .insert({
         client_name: form.value.client_name,
-        service_type: form.value.service_type,
+        service_type: form.value.service_type === 'Wedding' && form.value.sessions.length > 0 ? `Wedding - ${form.value.sessions.join(' + ')}` : form.value.service_type,
         event_date: form.value.event_date,
         user_id: user.value.id,
         client_phone: form.value.client_phone || null,
-        location: form.value.location || null
+        location: form.value.time_start && form.value.time_finish 
+          ? `${form.value.location || ''} | Waktu: ${form.value.time_start} - ${form.value.time_finish}`
+          : form.value.location || null
       })
       .select()
       .single()
@@ -224,11 +251,13 @@ const submitOrder = async () => {
     $fetch('/api/wa/send-new-order', {
       method: 'POST',
       body: {
-        client_name: form.value.client_name,
-        service_type: form.value.service_type,
-        event_date: form.value.event_date,
-        client_phone: form.value.client_phone,
-        location: form.value.location
+        client_name: order.client_name,
+        service_type: order.service_type,
+        event_date: order.event_date,
+        client_phone: order.client_phone,
+        location: form.value.location,
+        time_start: form.value.time_start,
+        time_finish: form.value.time_finish
       }
     }).then(async (waResult) => {
       if (waResult?.success) {
