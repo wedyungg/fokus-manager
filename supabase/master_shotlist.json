@@ -1,0 +1,135 @@
+[
+  {
+    "service_type": "Wedding",
+    "session_type": "Akad",
+    "item_name": "Ijab Kabul",
+    "category": "Wajib",
+    "technical_note": "Gunakan lensa medium (35mm/50mm), pastikan depth of field cukup (f/2.8 - f/4) untuk menangkap ekspresi pengantin pria, penghulu, dan wali nikah secara tajam."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Akad",
+    "item_name": "Tukar Cincin",
+    "category": "Wajib",
+    "technical_note": "Gunakan lensa makro atau telephoto (85mm/100mm) untuk extreme close-up. Fokus tajam pada cincin dan jari, hindari blocking dari tangan penghulu/keluarga."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Akad",
+    "item_name": "Penandatanganan Buku Nikah",
+    "category": "Wajib",
+    "technical_note": "Ambil dua angle: Wide angle (16mm-24mm) untuk menunjukkan suasana keseluruhan meja akad, dan Medium/Detail untuk momen pena menyentuh buku nikah."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Akad",
+    "item_name": "Sungkeman",
+    "category": "Wajib",
+    "technical_note": "Kombinasi kamera: Cam 1 (Wide 24mm) memotret keseluruhan susunan keluarga dari samping/belakang, Cam 2 (Tele 85mm/135mm) mengunci close-up pada mata/air mata yang jatuh. Gunakan silent shutter."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Akad",
+    "item_name": "Penyerahan Mahar",
+    "category": "Wajib",
+    "technical_note": "Fokus pada senyum pengantin dan detail mahar yang diserahkan. Gunakan lighting tambahan (bounce flash) jika pencahayaan ruangan kurang merata."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Akad",
+    "item_name": "Air Mata Haru / Emosi Keluarga",
+    "category": "Secondary",
+    "technical_note": "Candid shot menggunakan lensa telephoto (70-200mm). Pantau reaksi ibu/ayah pengantin dari kejauhan tanpa mengganggu momen khidmat."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Akad",
+    "item_name": "Detail Dekorasi Meja Akad & Cincin",
+    "category": "Secondary",
+    "technical_note": "Shallow depth of field (f/1.4 - f/1.8). Fokus pada tekstur bunga, ukiran kotak cincin, atau elemen estetis lainnya sebelum sesi dimulai."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Akad",
+    "item_name": "Refleksi Cermin saat Make-up (Paes)",
+    "category": "Kreatif",
+    "technical_note": "Manfaatkan frame-in-frame atau pantulan cermin rias dengan komposisi rule of thirds. Fokus pada mata pengantin di cermin."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Resepsi",
+    "item_name": "Masuk Pengantin (Kirab Adat)",
+    "category": "Wajib",
+    "technical_note": "Lensa wide (16-35mm) atau medium. Gunakan continuous AF (AF-C) dan burst mode untuk menangkap pergerakan langkah yang dinamis beserta iring-iringan cucuk lampah."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Resepsi",
+    "item_name": "Foto di Pelaminan",
+    "category": "Wajib",
+    "technical_note": "Lensa standar/medium (35-50mm), aperture tertutup (f/5.6 - f/8) agar semua anggota keluarga/tamu in-focus (Full body). Lighting flat dan merata (off-camera flash wajib)."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Resepsi",
+    "item_name": "Lempar Bunga / Handbouquet",
+    "category": "Wajib",
+    "technical_note": "Gunakan shutter speed tinggi (min. 1/500s) untuk membekukan momen bunga di udara. Angle dari bawah (low angle) dapat menambah kesan dramatis."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Resepsi",
+    "item_name": "Salaman dengan Tamu",
+    "category": "Secondary",
+    "technical_note": "Candid framing. Jangan ambil semua tamu, cukup ambil ekspresi paling natural (tertawa lepas, pelukan hangat) menggunakan medium-tele."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Resepsi",
+    "item_name": "Detail Riasan / Paes Ageng",
+    "category": "Secondary",
+    "technical_note": "Close-up shot. Fokus sangat tajam (pin-point AF) pada cunduk mentul, alis menjangan, atau detail roncean melati."
+  },
+  {
+    "service_type": "Wedding",
+    "session_type": "Resepsi",
+    "item_name": "Siluet Pengantin di Lorong / Backlight",
+    "category": "Kreatif",
+    "technical_note": "Eksplorasi rim light. Tempatkan flash di belakang pengantin (backlight) atau gunakan sumber cahaya alami jendela untuk menciptakan siluet estetik."
+  },
+  {
+    "service_type": "Graduation",
+    "session_type": "Private Portrait",
+    "item_name": "Foto Bersama Orang Tua",
+    "category": "Wajib",
+    "technical_note": "Lensa 35mm atau 50mm. Full body composition. Pastikan ruang di atas kepala (headroom) cukup dan posisi bahu proporsional (tidak distorsi)."
+  },
+  {
+    "service_type": "Graduation",
+    "session_type": "Private Portrait",
+    "item_name": "Pegang Ijazah / Tabung",
+    "category": "Wajib",
+    "technical_note": "Medium close-up (waist-up). Arahkan model untuk memiringkan tabung sedikit ke arah cahaya utama. Fokus tegas pada mata dan logo universitas di tabung."
+  },
+  {
+    "service_type": "Graduation",
+    "session_type": "Private Portrait",
+    "item_name": "Gordon / Atribut Universitas",
+    "category": "Secondary",
+    "technical_note": "Lensa makro atau bukaan lebar (f/1.8). Ekstrem close-up pada tekstur gordon, kalung medali, atau detail bordir kebaya/jas."
+  },
+  {
+    "service_type": "Graduation",
+    "session_type": "Private Portrait",
+    "item_name": "Tertawa Lepas / Interaksi",
+    "category": "Secondary",
+    "technical_note": "Candid. Pancing interaksi atau lelucon agar subjek tertawa senatural mungkin. Gunakan burst mode dengan eye-tracking AF."
+  },
+  {
+    "service_type": "Graduation",
+    "session_type": "Private Portrait",
+    "item_name": "Toss Toga di Udara",
+    "category": "Kreatif",
+    "technical_note": "Low angle ekstrem. Shutter speed super cepat (1/1000s+). Jika outdoor, letakkan matahari di belakang subjek untuk efek sun-flare."
+  }
+]

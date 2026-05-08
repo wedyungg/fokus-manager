@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-background: 255 255 255;
+    --color-foreground: 10 10 10;
+    --color-muted: 245 245 245;
+    --color-muted-foreground: 115 115 115;
+    --color-border: 229 229 229;
+  }
+
+  .dark {
+    --color-background: 10 10 10;
+    --color-foreground: 250 250 250;
+    --color-muted: 38 38 38;
+    --color-muted-foreground: 163 163 163;
+    --color-border: 38 38 38;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-foreground selection:text-background font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-tight;
+  }
+}
