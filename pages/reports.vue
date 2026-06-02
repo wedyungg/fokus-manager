@@ -75,13 +75,21 @@
         <h3 class="font-serif text-lg font-bold pt-2">Breakdown Order & Pembayaran</h3>
         
         <div v-if="orders.length === 0" class="text-center py-10 bg-muted/50 rounded-2xl border border-dashed border-border">
-          <p class="text-muted-foreground text-sm">Tidak ada order yang 'Selesai' & 'Lunas' di bulan ini.</p>
+          <p class="text-muted-foreground text-sm">Tidak ada order yang 'Selesai' di bulan ini.</p>
         </div>
 
         <div v-for="order in orders" :key="order.id" class="bg-background border border-border rounded-3xl p-5 shadow-subtle">
           <NuxtLink :to="`/orders/${order.id}`" class="flex justify-between items-start mb-4 group hover:bg-muted/50 p-2 -mx-2 rounded-xl transition-colors">
             <div>
-              <h4 class="font-semibold text-base group-hover:text-muted-foreground transition-colors">{{ order.client_name }}</h4>
+              <div class="flex items-center gap-2 mb-1">
+                <h4 class="font-semibold text-base group-hover:text-muted-foreground transition-colors">{{ order.client_name }}</h4>
+                <span 
+                  class="px-2 py-0.5 text-[10px] font-medium rounded-md uppercase tracking-wider"
+                  :class="order.payment_status === 'lunas' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'"
+                >
+                  {{ order.payment_status === 'lunas' ? 'Lunas' : 'DP' }}
+                </span>
+              </div>
               <p class="text-xs text-muted-foreground">{{ formatDate(order.event_date) }} • {{ order.service_type }}</p>
             </div>
             <div class="text-right">
@@ -209,16 +217,20 @@ const chartOptions = {
 const fetchReportData = async () => {
   loading.value = true
   try {
-    // Start and end date for the selected month
-    const startOfMonth = new Date(selectedYear.value, selectedMonth.value, 1).toISOString().split('T')[0]
-    const endOfMonth = new Date(selectedYear.value, selectedMonth.value + 1, 0).toISOString().split('T')[0]
+    // Start and end date for the selected month (Avoiding toISOString timezone bugs)
+    const pad = (n) => n.toString().padStart(2, '0')
+    const y = selectedYear.value
+    const m = selectedMonth.value + 1
+    
+    const startOfMonth = `${y}-${pad(m)}-01`
+    const lastDay = new Date(y, m, 0).getDate()
+    const endOfMonth = `${y}-${pad(m)}-${pad(lastDay)}`
 
-    // Fetch done & lunas orders within the month
+    // Fetch done orders within the month
     const { data: ordersData, error: ordersError } = await supabase
       .from('orders')
-      .select('id, client_name, service_type, event_date')
+      .select('id, client_name, service_type, event_date, payment_status')
       .eq('status', 'done')
-      .eq('payment_status', 'lunas')
       .gte('event_date', startOfMonth)
       .lte('event_date', endOfMonth)
       .order('event_date', { ascending: true })
