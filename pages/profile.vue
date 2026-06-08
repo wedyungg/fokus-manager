@@ -46,6 +46,16 @@
         </div>
       </div>
 
+      <div v-if="profile?.role === 'admin'" class="w-full bg-background border border-border p-5 rounded-3xl shadow-subtle mb-8">
+        <h3 class="font-serif text-lg font-bold mb-4">Tren Profit Bulanan</h3>
+        <div class="h-48">
+          <Line :data="chartData" :options="chartOptions" v-if="chartData.labels.length > 0" />
+          <div v-else class="h-full flex items-center justify-center text-muted-foreground text-sm">
+            Tidak ada data grafik.
+          </div>
+        </div>
+      </div>
+
       <button 
         @click="handleLogout"
         class="w-full py-3 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-colors border border-red-100 dark:bg-red-950/30 dark:border-red-900"
@@ -57,15 +67,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useSupabaseClient, useSupabaseUser, navigateTo } from '#imports'
 import { User as IconUser } from 'lucide-vue-next'
+import { Line } from 'vue-chartjs'
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler } from 'chart.js'
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const profile = ref(null)
 const loading = ref(true)
 const revenue = ref({ gross: 0, net: 0 })
+const rawFinances = ref([])
 const debugError = ref(null)
 
 const fetchProfile = async () => {
@@ -103,16 +118,78 @@ const fetchRevenue = async () => {
   try {
     const { data, error } = await supabase
       .from('finances')
-      .select('total_gross, net_profit, orders!inner(status)')
+      .select('total_gross, net_profit, orders!inner(status, event_date)')
       .eq('orders.status', 'done')
       
     if (data) {
+      rawFinances.value = data
       const gross = data.reduce((sum, item) => sum + (Number(item.total_gross) || 0), 0)
       const net = data.reduce((sum, item) => sum + (Number(item.net_profit) || 0), 0)
       revenue.value = { gross, net }
     }
   } catch (e) {
     console.error('Failed to fetch revenue', e)
+  }
+}
+
+const chartData = computed(() => {
+  if (!rawFinances.value.length) return { labels: [], datasets: [] }
+
+  const monthlyData = {}
+  rawFinances.value.forEach(item => {
+    const dateStr = item.orders?.event_date
+    if (!dateStr) return
+    const date = new Date(dateStr)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const key = `${year}-${month}`
+    
+    if (!monthlyData[key]) monthlyData[key] = 0
+    monthlyData[key] += Number(item.net_profit) || 0
+  })
+
+  const sortedKeys = Object.keys(monthlyData).sort()
+  const labels = sortedKeys.map(key => {
+    const [year, month] = key.split('-')
+    const date = new Date(year, month - 1, 1)
+    return date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })
+  })
+  
+  const dataPoints = sortedKeys.map(key => monthlyData[key])
+
+  return {
+    labels,
+    datasets: [{
+      label: 'Net Profit',
+      data: dataPoints,
+      borderColor: '#f59e0b',
+      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      borderWidth: 2,
+      tension: 0.3,
+      fill: true,
+      pointBackgroundColor: '#f59e0b',
+      pointRadius: 4
+    }]
+  }
+})
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: {
+        callback: value => 'Rp ' + (value / 1000) + 'k',
+        font: { size: 10 }
+      },
+      grid: { color: 'rgba(0,0,0,0.05)' }
+    },
+    x: {
+      grid: { display: false },
+      ticks: { font: { size: 10 } }
+    }
   }
 }
 
