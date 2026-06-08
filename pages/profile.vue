@@ -55,12 +55,17 @@ const revenue = ref({ gross: 0, net: 0 })
 const debugError = ref(null)
 
 const fetchProfile = async () => {
-  if (!user.value) return
   try {
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
+    if (!authUser || !authUser.id) {
+      debugError.value = "Failed to get auth user ID"
+      return
+    }
+
     const { data, error } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', user.value.id)
+      .eq('id', authUser.id)
       .single()
       
     if (error) {
