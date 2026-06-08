@@ -23,12 +23,20 @@
         
         <div class="grid grid-cols-2 gap-4 mb-4">
           <div class="bg-white/5 rounded-xl p-3 border border-white/10">
-            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Hak Fokus Kesini (40%)</p>
-            <p class="font-semibold text-amber-400 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.40) }}</p>
+            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Pekerja (30%)</p>
+            <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.30) }}</p>
           </div>
           <div class="bg-white/5 rounded-xl p-3 border border-white/10">
-            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Hak Fathur (60%)</p>
-            <p class="font-semibold text-emerald-400 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.60) }}</p>
+            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Alat (30%)</p>
+            <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.30) }}</p>
+          </div>
+          <div class="bg-white/5 rounded-xl p-3 border border-white/10">
+            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Mitra (30%)</p>
+            <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.30) }}</p>
+          </div>
+          <div class="bg-white/5 rounded-xl p-3 border border-white/10">
+            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Pemodal (10%)</p>
+            <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.10) }}</p>
           </div>
         </div>
 
