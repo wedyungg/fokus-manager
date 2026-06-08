@@ -8,11 +8,16 @@
       </div>
       
       <h3 class="font-serif text-xl font-bold">{{ user.email }}</h3>
-      <p class="text-muted-foreground text-sm mb-6 uppercase tracking-wider font-semibold">
+      <p class="text-muted-foreground text-sm mb-4 uppercase tracking-wider font-semibold">
         <span v-if="loading" class="animate-pulse">Loading...</span>
         <span v-else-if="profile?.role === 'admin'" class="text-amber-600 dark:text-amber-500">Administrator</span>
         <span v-else>Staff / Editor</span>
       </p>
+
+      <div v-if="!loading && profile?.role !== 'admin'" class="bg-red-50 border border-red-100 p-3 rounded-lg mb-6 w-full text-center">
+        <p class="text-xs text-red-600 font-mono">DB Role: {{ profile ? profile.role : 'NULL' }}</p>
+        <p v-if="debugError" class="text-xs text-red-600 font-mono mt-1">Err: {{ debugError }}</p>
+      </div>
       
       <div v-if="profile?.role === 'admin'" class="w-full bg-gradient-to-br from-neutral-900 to-black text-white dark:from-neutral-800 dark:to-neutral-900 rounded-3xl p-6 mb-8 shadow-xl border border-neutral-800 relative overflow-hidden">
         <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
@@ -47,6 +52,7 @@ const user = useSupabaseUser()
 const profile = ref(null)
 const loading = ref(true)
 const revenue = ref({ gross: 0, net: 0 })
+const debugError = ref(null)
 
 const fetchProfile = async () => {
   if (!user.value) return
@@ -57,6 +63,10 @@ const fetchProfile = async () => {
       .eq('id', user.value.id)
       .single()
       
+    if (error) {
+      debugError.value = error.message
+    }
+
     if (data) {
       profile.value = data
       if (data.role === 'admin') {
