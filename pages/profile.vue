@@ -14,18 +14,24 @@
         <span v-else>Staff / Editor</span>
       </p>
 
-      <div v-if="!loading && profile?.role !== 'admin'" class="bg-red-50 border border-red-100 p-3 rounded-lg mb-6 w-full text-center">
-        <p class="text-xs text-red-600 font-mono">DB Role: {{ profile ? profile.role : 'NULL' }}</p>
-        <p v-if="debugError" class="text-xs text-red-600 font-mono mt-1">Err: {{ debugError }}</p>
-      </div>
-      
       <div v-if="profile?.role === 'admin'" class="w-full bg-gradient-to-br from-neutral-900 to-black text-white dark:from-neutral-800 dark:to-neutral-900 rounded-3xl p-6 mb-8 shadow-xl border border-neutral-800 relative overflow-hidden">
         <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
-        <p class="text-white/60 text-xs font-medium mb-1 tracking-widest uppercase">Total Pendapatan Keseluruhan</p>
+        <p class="text-white/60 text-xs font-medium mb-1 tracking-widest uppercase">Total Pendapatan Bersih Keseluruhan</p>
         <h3 class="text-3xl font-serif font-bold mb-4 tracking-tight text-amber-400">
           {{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net) }}
         </h3>
         
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="bg-white/5 rounded-xl p-3 border border-white/10">
+            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Hak Fokus Kesini (40%)</p>
+            <p class="font-semibold text-amber-400 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.40) }}</p>
+          </div>
+          <div class="bg-white/5 rounded-xl p-3 border border-white/10">
+            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Hak Fathur (60%)</p>
+            <p class="font-semibold text-emerald-400 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.60) }}</p>
+          </div>
+        </div>
+
         <div class="pt-4 border-t border-white/10">
            <p class="text-white/50 text-xs font-medium mb-1">Total Omzet (Bruto)</p>
            <p class="font-semibold text-white/90">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.gross) }}</p>
