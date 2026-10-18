@@ -50,9 +50,15 @@
           </span>
         </div>
         
-        <div class="flex items-center text-sm text-muted-foreground pt-2 border-t border-border/50">
-          <IconCalendar class="w-4 h-4 mr-2 shrink-0" />
-          <span class="truncate">{{ formatDate(order.event_date) }}</span>
+        <div class="space-y-1.5 pt-3 border-t border-border/50 text-xs text-muted-foreground">
+          <div class="flex items-center">
+            <IconCalendar class="w-3.5 h-3.5 mr-2 shrink-0 text-foreground/70" />
+            <span class="truncate">{{ formatDate(order.event_date) }}</span>
+          </div>
+          <div v-if="order.location" class="flex items-center">
+            <IconMapPin class="w-3.5 h-3.5 mr-2 shrink-0 text-foreground/70" />
+            <span class="truncate">{{ order.location }}</span>
+          </div>
         </div>
       </NuxtLink>
     </div>
@@ -62,7 +68,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useSupabaseClient, useSupabaseUser, navigateTo } from '#imports'
-import { Plus as IconPlus, Briefcase as IconBriefcase, Calendar as IconCalendar } from 'lucide-vue-next'
+import { Plus as IconPlus, Briefcase as IconBriefcase, Calendar as IconCalendar, MapPin as IconMapPin } from 'lucide-vue-next'
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()

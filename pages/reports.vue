@@ -21,20 +21,20 @@
     <template v-else>
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         <!-- Global Report Card -->
-        <div class="lg:col-span-5 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-neutral-800 dark:to-neutral-900 text-foreground rounded-3xl p-6 shadow-subtle relative overflow-hidden border border-border flex flex-col justify-between">
+        <div class="lg:col-span-5 bg-gradient-to-br from-neutral-900 to-black text-white dark:from-neutral-800/90 dark:to-neutral-950 rounded-3xl p-6 shadow-xl relative overflow-hidden border border-neutral-800 flex flex-col justify-between">
           <div>
-            <p class="text-muted-foreground text-sm font-medium mb-1">Total Net Profit</p>
-            <h3 class="text-3xl md:text-4xl font-serif font-bold mb-6 tracking-tight text-foreground tabular-nums">{{ formatCurrency(totals.netProfit) }}</h3>
+            <p class="text-white/60 text-xs font-medium mb-1 uppercase tracking-widest">Total Net Profit</p>
+            <h3 class="text-3xl md:text-4xl font-serif font-bold mb-6 tracking-tight text-white tabular-nums">{{ formatCurrency(totals.netProfit) }}</h3>
           </div>
           
-          <div class="grid grid-cols-2 gap-4 border-t border-border pt-4 tabular-nums">
+          <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4 tabular-nums">
             <div>
-              <p class="text-muted-foreground text-xs font-medium mb-1">Total Omzet (Bruto)</p>
-              <p class="font-semibold text-foreground">{{ formatCurrency(totals.gross) }}</p>
+              <p class="text-white/50 text-xs font-medium mb-1">Total Omzet (Bruto)</p>
+              <p class="font-semibold text-white/90">{{ formatCurrency(totals.gross) }}</p>
             </div>
             <div>
-              <p class="text-muted-foreground text-xs font-medium mb-1">Total Operasional</p>
-              <p class="font-semibold text-foreground">{{ formatCurrency(totals.expenses) }}</p>
+              <p class="text-white/50 text-xs font-medium mb-1">Total Operasional</p>
+              <p class="font-semibold text-white/90">{{ formatCurrency(totals.expenses) }}</p>
             </div>
           </div>
         </div>
@@ -55,19 +55,19 @@
       <div class="bg-background border border-border p-5 md:p-6 rounded-3xl shadow-subtle">
         <h3 class="font-serif text-lg font-bold mb-4">Akumulasi Bagi Hasil</h3>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 tabular-nums">
-          <div class="bg-muted p-4 rounded-2xl">
+          <div class="bg-muted p-4 rounded-2xl border border-border/50">
             <p class="text-xs text-muted-foreground font-medium mb-1">Pekerja (30%)</p>
             <p class="font-bold">{{ formatCurrency(totals.netProfit * 0.3) }}</p>
           </div>
-          <div class="bg-muted p-4 rounded-2xl">
+          <div class="bg-muted p-4 rounded-2xl border border-border/50">
             <p class="text-xs text-muted-foreground font-medium mb-1">Alat (30%)</p>
             <p class="font-bold">{{ formatCurrency(totals.netProfit * 0.3) }}</p>
           </div>
-          <div class="bg-muted p-4 rounded-2xl">
+          <div class="bg-muted p-4 rounded-2xl border border-border/50">
             <p class="text-xs text-muted-foreground font-medium mb-1">Mitra (30%)</p>
             <p class="font-bold">{{ formatCurrency(totals.netProfit * 0.3) }}</p>
           </div>
-          <div class="bg-muted p-4 rounded-2xl">
+          <div class="bg-muted p-4 rounded-2xl border border-border/50">
             <p class="text-xs text-muted-foreground font-medium mb-1">Pemodal (10%)</p>
             <p class="font-bold">{{ formatCurrency(totals.netProfit * 0.1) }}</p>
           </div>
@@ -89,8 +89,8 @@
                 <div class="flex items-center gap-2 mb-1">
                   <h4 class="font-semibold text-base group-hover:text-muted-foreground transition-colors duration-150 truncate">{{ order.client_name }}</h4>
                   <span 
-                    class="px-2 py-0.5 text-[10px] font-medium rounded-md uppercase tracking-wider shrink-0"
-                    :class="order.payment_status === 'lunas' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'"
+                    class="px-2 py-0.5 text-[10px] font-medium rounded-md uppercase tracking-wider shrink-0 border"
+                    :class="order.payment_status === 'lunas' ? 'bg-foreground text-background border-foreground' : 'bg-muted text-muted-foreground border-border'"
                   >
                     {{ order.payment_status === 'lunas' ? 'Lunas' : 'DP' }}
                   </span>
@@ -99,26 +99,26 @@
               </div>
               <div class="text-right shrink-0">
                 <p class="text-xs text-muted-foreground mb-0.5">Net Profit</p>
-                <p class="font-bold text-sm bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded tabular-nums">{{ formatCurrency(order.finance?.net_profit || 0) }}</p>
+                <p class="font-bold text-sm bg-muted text-foreground border border-border px-2.5 py-0.5 rounded-lg tabular-nums">{{ formatCurrency(order.finance?.net_profit || 0) }}</p>
               </div>
             </NuxtLink>
             
             <!-- Checkboxes for Payment Tracking -->
             <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-border tabular-nums">
               <label class="flex items-center space-x-2 text-sm cursor-pointer">
-                <input type="checkbox" v-model="order.finance.is_paid_pekerja" @change="updatePayment(order.finance.id, 'is_paid_pekerja', order.finance.is_paid_pekerja)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
+                <input type="checkbox" v-model="order.finance.is_paid_pekerja" @change="updatePayment(order.finance.id, 'is_paid_pekerja', order.finance.is_paid_pekerja)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50 accent-foreground" />
                 <span :class="{'text-muted-foreground': !isAdmin}" class="truncate">Pekerja <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.3)}})</span></span>
               </label>
               <label class="flex items-center space-x-2 text-sm cursor-pointer">
-                <input type="checkbox" v-model="order.finance.is_paid_alat" @change="updatePayment(order.finance.id, 'is_paid_alat', order.finance.is_paid_alat)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
+                <input type="checkbox" v-model="order.finance.is_paid_alat" @change="updatePayment(order.finance.id, 'is_paid_alat', order.finance.is_paid_alat)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50 accent-foreground" />
                 <span :class="{'text-muted-foreground': !isAdmin}" class="truncate">Alat <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.3)}})</span></span>
               </label>
               <label class="flex items-center space-x-2 text-sm cursor-pointer">
-                <input type="checkbox" v-model="order.finance.is_paid_mitra" @change="updatePayment(order.finance.id, 'is_paid_mitra', order.finance.is_paid_mitra)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
+                <input type="checkbox" v-model="order.finance.is_paid_mitra" @change="updatePayment(order.finance.id, 'is_paid_mitra', order.finance.is_paid_mitra)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50 accent-foreground" />
                 <span :class="{'text-muted-foreground': !isAdmin}" class="truncate">Mitra <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.3)}})</span></span>
               </label>
               <label class="flex items-center space-x-2 text-sm cursor-pointer">
-                <input type="checkbox" v-model="order.finance.is_paid_pemodal" @change="updatePayment(order.finance.id, 'is_paid_pemodal', order.finance.is_paid_pemodal)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
+                <input type="checkbox" v-model="order.finance.is_paid_pemodal" @change="updatePayment(order.finance.id, 'is_paid_pemodal', order.finance.is_paid_pemodal)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50 accent-foreground" />
                 <span :class="{'text-muted-foreground': !isAdmin}" class="truncate">Pemodal <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.1)}})</span></span>
               </label>
             </div>
@@ -131,7 +131,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useSupabaseClient, useSupabaseUser, navigateTo } from '#imports'
+import { useSupabaseClient, useSupabaseUser, useColorMode, navigateTo } from '#imports'
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler } from 'chart.js'
 
@@ -139,6 +139,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const colorMode = useColorMode()
 
 const isAdmin = computed(() => user.value?.email === 'mziyan21@gmail.com' || user.value?.user_metadata?.role === 'admin')
 
@@ -178,47 +179,58 @@ const chartData = computed(() => {
   // Only show chart if there's data
   if (dailyProfits.every(v => v === 0)) return { labels: [], datasets: [] }
 
+  const isDark = colorMode.value === 'dark'
+  const lineColor = isDark ? '#fafafa' : '#171717'
+  const fillColor = isDark ? 'rgba(250, 250, 250, 0.08)' : 'rgba(23, 23, 23, 0.06)'
+
   return {
     labels: Array.from({length: daysInMonth}, (_, i) => i + 1),
     datasets: [
       {
         label: 'Net Profit',
         data: dailyProfits,
-        borderColor: '#3b82f6', // Safe blue color for both themes
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: lineColor,
+        backgroundColor: fillColor,
         borderWidth: 2,
         tension: 0.3,
         fill: true,
-        pointBackgroundColor: '#3b82f6',
+        pointBackgroundColor: lineColor,
         pointRadius: 3
       }
     ]
   }
 })
 
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false }
-  },
-  scales: {
-    y: {
-      beginAtZero: true,
-      ticks: {
-        callback: function(value) {
-          return 'Rp ' + (value / 1000) + 'k'
-        },
-        font: { size: 10 }
-      },
-      grid: { color: 'rgba(0,0,0,0.05)' }
+const chartOptions = computed(() => {
+  const isDark = colorMode.value === 'dark'
+  const tickColor = isDark ? '#a3a3a3' : '#737373'
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false }
     },
-    x: {
-      grid: { display: false },
-      ticks: { font: { size: 10 } }
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: tickColor,
+          callback: function(value) {
+            return 'Rp ' + (value / 1000) + 'k'
+          },
+          font: { size: 10 }
+        },
+        grid: { color: gridColor }
+      },
+      x: {
+        grid: { display: false },
+        ticks: { color: tickColor, font: { size: 10 } }
+      }
     }
   }
-}
+})
 
 const fetchReportData = async () => {
   loading.value = true

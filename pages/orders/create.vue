@@ -74,15 +74,15 @@
             <label class="block text-sm font-medium mb-2">Sub-Sesi (Pilih minimal satu)</label>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-background/60 transition-colors">
-                <input type="checkbox" value="Akad" v-model="form.sessions" class="w-4 h-4 rounded border-border text-foreground focus:ring-foreground" />
+                <input type="checkbox" value="Akad" v-model="form.sessions" class="w-4 h-4 rounded border-border text-foreground focus:ring-foreground accent-foreground" />
                 <span class="text-sm">Akad / Pemberkatan</span>
               </label>
               <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-background/60 transition-colors">
-                <input type="checkbox" value="Resepsi" v-model="form.sessions" class="w-4 h-4 rounded border-border text-foreground focus:ring-foreground" />
+                <input type="checkbox" value="Resepsi" v-model="form.sessions" class="w-4 h-4 rounded border-border text-foreground focus:ring-foreground accent-foreground" />
                 <span class="text-sm">Resepsi</span>
               </label>
               <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-background/60 transition-colors">
-                <input type="checkbox" value="Ngunduh Mantu" v-model="form.sessions" class="w-4 h-4 rounded border-border text-foreground focus:ring-foreground" />
+                <input type="checkbox" value="Ngunduh Mantu" v-model="form.sessions" class="w-4 h-4 rounded border-border text-foreground focus:ring-foreground accent-foreground" />
                 <span class="text-sm">Ngunduh Mantu</span>
               </label>
             </div>

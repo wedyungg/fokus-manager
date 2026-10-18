@@ -11,17 +11,21 @@
           </div>
           <div>
             <h3 class="font-serif text-xl md:text-2xl font-bold">{{ user?.email }}</h3>
-            <p class="text-muted-foreground text-xs md:text-sm mt-1 uppercase tracking-wider font-semibold">
-              <span v-if="loading" class="animate-pulse">Loading...</span>
-              <span v-else-if="profile?.role === 'admin'" class="text-amber-600 dark:text-amber-500">Administrator</span>
-              <span v-else>Staff / Editor</span>
-            </p>
+            <div class="mt-1.5">
+              <span v-if="loading" class="text-xs text-muted-foreground uppercase tracking-wider font-semibold animate-pulse">Loading...</span>
+              <span v-else-if="profile?.role === 'admin'" class="inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-full bg-foreground text-background">
+                Administrator
+              </span>
+              <span v-else class="inline-block px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest rounded-full bg-muted text-muted-foreground border border-border">
+                Staff / Editor
+              </span>
+            </div>
           </div>
         </div>
 
         <button 
           @click="handleLogout"
-          class="w-full sm:w-auto px-6 py-3 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 border border-red-100 dark:bg-red-950/30 dark:border-red-900 shrink-0"
+          class="w-full sm:w-auto px-6 py-3 bg-muted text-foreground rounded-xl font-medium hover:bg-foreground hover:text-background border border-border shrink-0"
         >
           Keluar (Logout)
         </button>
@@ -29,11 +33,11 @@
 
       <!-- Admin All-Time Revenue & Monthly Chart Grid -->
       <div v-if="profile?.role === 'admin'" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <div class="lg:col-span-6 w-full bg-gradient-to-br from-neutral-900 to-black text-white dark:from-neutral-800 dark:to-neutral-900 rounded-3xl p-6 shadow-xl border border-neutral-800 relative overflow-hidden flex flex-col justify-between">
+        <div class="lg:col-span-6 w-full bg-gradient-to-br from-neutral-900 to-black text-white dark:from-neutral-800/90 dark:to-neutral-950 rounded-3xl p-6 shadow-xl border border-neutral-800 relative overflow-hidden flex flex-col justify-between">
           <div>
-            <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
             <p class="text-white/60 text-xs font-medium mb-1 tracking-widest uppercase">Total Pendapatan Bersih Keseluruhan</p>
-            <h3 class="text-3xl md:text-4xl font-serif font-bold mb-6 tracking-tight text-amber-400 tabular-nums">
+            <h3 class="text-3xl md:text-4xl font-serif font-bold mb-6 tracking-tight text-white tabular-nums">
               {{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net) }}
             </h3>
             
@@ -79,7 +83,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useSupabaseClient, useSupabaseUser, navigateTo } from '#imports'
+import { useSupabaseClient, useSupabaseUser, useColorMode, navigateTo } from '#imports'
 import { User as IconUser } from 'lucide-vue-next'
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler } from 'chart.js'
@@ -88,6 +92,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const colorMode = useColorMode()
 const profile = ref(null)
 const loading = ref(true)
 const revenue = ref({ gross: 0, net: 0 })
@@ -169,41 +174,52 @@ const chartData = computed(() => {
   
   const dataPoints = sortedKeys.map(key => monthlyData[key])
 
+  const isDark = colorMode.value === 'dark'
+  const lineColor = isDark ? '#fafafa' : '#171717'
+  const fillColor = isDark ? 'rgba(250, 250, 250, 0.08)' : 'rgba(23, 23, 23, 0.06)'
+
   return {
     labels,
     datasets: [{
       label: 'Net Profit',
       data: dataPoints,
-      borderColor: '#f59e0b',
-      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      borderColor: lineColor,
+      backgroundColor: fillColor,
       borderWidth: 2,
       tension: 0.3,
       fill: true,
-      pointBackgroundColor: '#f59e0b',
+      pointBackgroundColor: lineColor,
       pointRadius: 4
     }]
   }
 })
 
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    y: {
-      beginAtZero: true,
-      ticks: {
-        callback: value => 'Rp ' + (value / 1000) + 'k',
-        font: { size: 10 }
+const chartOptions = computed(() => {
+  const isDark = colorMode.value === 'dark'
+  const tickColor = isDark ? '#a3a3a3' : '#737373'
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: tickColor,
+          callback: value => 'Rp ' + (value / 1000) + 'k',
+          font: { size: 10 }
+        },
+        grid: { color: gridColor }
       },
-      grid: { color: 'rgba(0,0,0,0.05)' }
-    },
-    x: {
-      grid: { display: false },
-      ticks: { font: { size: 10 } }
+      x: {
+        grid: { display: false },
+        ticks: { color: tickColor, font: { size: 10 } }
+      }
     }
   }
-}
+})
 
 onMounted(async () => {
   if (user.value) {

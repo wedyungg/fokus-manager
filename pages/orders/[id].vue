@@ -8,8 +8,8 @@
           <span v-if="order?.location" class="text-xs text-muted-foreground flex items-center">
             <IconMapPin class="w-3.5 h-3.5 mr-1" /> {{ order.location }}
           </span>
-          <a v-if="order?.client_phone" :href="`https://wa.me/${order.client_phone.replace(/[^0-9]/g, '')}`" target="_blank" rel="noopener" class="text-xs text-green-600 dark:text-green-400 flex items-center hover:underline">
-            <IconPhone class="w-3.5 h-3.5 mr-1" /> {{ order.client_phone }}
+          <a v-if="order?.client_phone" :href="`https://wa.me/${order.client_phone.replace(/[^0-9]/g, '')}`" target="_blank" rel="noopener" class="text-xs text-foreground font-medium flex items-center hover:underline">
+            <IconPhone class="w-3.5 h-3.5 mr-1 text-muted-foreground" /> {{ order.client_phone }}
           </a>
         </div>
       </div>
@@ -19,17 +19,17 @@
     </div>
     
     <!-- Link Selection Box for Client (Visible when done) -->
-    <div v-if="order?.status === 'done' && order?.client_selection_link" class="bg-blue-50 border border-blue-100 dark:bg-blue-950/30 dark:border-blue-900 rounded-xl p-4 mb-4 shadow-subtle max-w-2xl">
-      <h3 class="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider mb-2 flex items-center">
-        <IconLink class="w-3.5 h-3.5 mr-1" /> Link Pemilihan Foto Klien
+    <div v-if="order?.status === 'done' && order?.client_selection_link" class="bg-muted/50 border border-border rounded-2xl p-4 mb-4 shadow-subtle max-w-2xl">
+      <h3 class="text-xs font-bold text-foreground uppercase tracking-wider mb-2.5 flex items-center">
+        <IconLink class="w-3.5 h-3.5 mr-1.5 text-muted-foreground" /> Link Pemilihan Foto Klien
       </h3>
       <div class="flex items-center gap-2">
-        <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-white dark:bg-black/20 border border-blue-200 dark:border-blue-800 text-xs px-3 py-2 rounded-lg text-muted-foreground outline-none cursor-text select-all" />
-        <button @click="copyLink(order.client_selection_link)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap shadow-sm">
+        <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-background border border-border text-xs px-3 py-2.5 rounded-xl text-muted-foreground outline-none cursor-text select-all font-mono" />
+        <button @click="copyLink(order.client_selection_link)" class="bg-foreground text-background hover:bg-foreground/90 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shadow-subtle">
           {{ copied ? 'Tersalin!' : 'Copy' }}
         </button>
       </div>
-      <p class="text-[10px] text-blue-600/70 dark:text-blue-400/70 mt-2">Maksimal pilihan: {{ order.max_selections }} foto</p>
+      <p class="text-[11px] text-muted-foreground mt-2 tabular-nums">Maksimal pilihan: {{ order.max_selections }} foto</p>
     </div>
 
     <!-- Loading -->
@@ -182,12 +182,12 @@
                     type="text" 
                     inputmode="numeric"
                     placeholder="0"
-                    class="w-full pl-8 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-red-500 transition-[border-color,box-shadow] duration-150 ease-emil-out text-red-500 font-mono tabular-nums" 
+                    class="w-full pl-8 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out text-foreground font-mono tabular-nums" 
                   />
                 </div>
                 <button 
                   @click="removeExpense(idx)" 
-                  class="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg"
+                  class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
                   title="Hapus"
                 >
                   <IconTrash2 class="w-4 h-4" />
@@ -199,9 +199,9 @@
               </div>
             </div>
             
-            <div class="flex justify-between items-center mt-3 p-3 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-100 dark:border-red-900/50">
-              <span class="text-sm font-medium text-red-600 dark:text-red-400">Total Pengeluaran</span>
-              <span class="text-sm font-bold text-red-600 dark:text-red-400 font-mono tabular-nums">-{{ formatCurrency(financeData.expenses) }}</span>
+            <div class="flex justify-between items-center mt-3 p-3.5 bg-muted/60 rounded-xl border border-border">
+              <span class="text-sm font-medium text-muted-foreground">Total Pengeluaran</span>
+              <span class="text-sm font-bold text-foreground font-mono tabular-nums">-{{ formatCurrency(financeData.expenses) }}</span>
             </div>
           </div>
 
@@ -232,7 +232,7 @@
               <span class="text-muted-foreground">BRUTO</span>
               <span>{{ formatCurrency(financeData.total_gross) }}</span>
             </div>
-            <div class="flex justify-between text-red-500/80">
+            <div class="flex justify-between text-muted-foreground">
               <span>BIAYA OPS.</span>
               <span>-{{ formatCurrency(financeData.expenses) }}</span>
             </div>
@@ -311,11 +311,11 @@
             <h3 class="font-serif text-lg font-semibold">Generate Link Klien</h3>
           </div>
           
-          <div v-if="order?.client_selection_link" class="mb-6 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-900/50">
-             <p class="text-sm text-blue-800 dark:text-blue-300 mb-2 font-medium">Link Pemilihan Klien Aktif:</p>
+          <div v-if="order?.client_selection_link" class="mb-6 p-4 bg-muted/50 rounded-xl border border-border">
+             <p class="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Link Pemilihan Klien Aktif</p>
              <div class="flex items-center gap-2">
-               <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-white dark:bg-black/20 border border-blue-200 dark:border-blue-800 text-xs px-3 py-2 rounded-lg text-muted-foreground outline-none cursor-text select-all" />
-               <button @click="copyLink(order.client_selection_link)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap shadow-sm">
+               <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-background border border-border text-xs px-3 py-2.5 rounded-xl text-muted-foreground outline-none cursor-text select-all font-mono" />
+               <button @click="copyLink(order.client_selection_link)" class="bg-foreground text-background hover:bg-foreground/90 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shadow-subtle">
                  {{ copied ? 'Tersalin!' : 'Copy' }}
                </button>
              </div>
