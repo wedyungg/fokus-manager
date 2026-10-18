@@ -1,46 +1,48 @@
 <template>
-  <div class="flex flex-col justify-center min-h-[80vh]">
+  <div class="flex flex-col justify-center min-h-[80vh] max-w-md mx-auto w-full">
     <div class="mb-8 text-center">
       <h1 class="text-3xl font-serif font-bold mb-2">Fokus Manager</h1>
       <p class="text-muted-foreground text-sm">Masuk untuk mengelola alur kerja lapangan Anda.</p>
     </div>
 
-    <div class="bg-background border border-border rounded-2xl p-6 shadow-subtle">
+    <div class="bg-background border border-border rounded-2xl p-6 md:p-8 shadow-subtle">
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
-          <label for="identifier" class="block text-sm font-medium mb-1">Username atau Email</label>
+          <label for="identifier" class="block text-sm font-medium mb-1.5">Username atau Email</label>
           <input 
             id="identifier" 
             v-model="identifier" 
             type="text" 
             required 
             placeholder="namauser atau email@anda.com"
-            class="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all font-sans"
+            class="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out font-sans"
           />
         </div>
         
         <div>
-          <label for="password" class="block text-sm font-medium mb-1">Password</label>
+          <label for="password" class="block text-sm font-medium mb-1.5">Password</label>
           <input 
             id="password" 
             v-model="password" 
             type="password" 
             required 
             placeholder="••••••••"
-            class="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
+            class="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out"
           />
         </div>
 
-        <div v-if="errorMsg" class="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-900">
-          {{ errorMsg }}
-        </div>
+        <Transition name="popover">
+          <div v-if="errorMsg" class="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950/30 rounded-xl border border-red-200 dark:border-red-900">
+            {{ errorMsg }}
+          </div>
+        </Transition>
 
         <button 
           type="submit" 
           :disabled="loading"
-          class="w-full py-3 px-4 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground transition-all flex justify-center items-center mt-2 disabled:opacity-70"
+          class="w-full py-3 px-4 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground flex justify-center items-center mt-2 disabled:opacity-70"
         >
-          <span v-if="loading" class="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin mr-2"></span>
+          <span v-if="loading" class="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2"></span>
           {{ loading ? 'Memproses...' : 'Masuk' }}
         </button>
       </form>
@@ -53,14 +55,22 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useSupabaseClient, navigateTo } from '#imports'
+import { ref, watch } from 'vue'
+import { useSupabaseClient, useSupabaseUser, navigateTo } from '#imports'
 
 const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const identifier = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
+
+// Otomatis arahkan ke /orders jika sesi user sudah aktif / terdeteksi
+watch(user, (newUser) => {
+  if (newUser) {
+    navigateTo('/orders', { replace: true })
+  }
+}, { immediate: true })
 
 const handleLogin = async () => {
   loading.value = true
@@ -87,7 +97,7 @@ const handleLogin = async () => {
     }
 
     // 3. Login dengan email yang sudah diketahui
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: loginEmail,
       password: password.value,
     })
@@ -99,11 +109,14 @@ const handleLogin = async () => {
       throw error
     }
     
-    await navigateTo('/', { replace: true })
+    // Pastikan sesi tersinkronisasi dan langsung navigasi ke /orders (beranda)
+    if (authData?.session) {
+      await navigateTo('/orders', { replace: true })
+    }
   } catch (error) {
     errorMsg.value = error.message
-  } finally {
     loading.value = false
   }
 }
 </script>
+

@@ -1,31 +1,31 @@
 <template>
-  <div class="bg-background border border-border rounded-xl shadow-subtle p-3 inline-block">
+  <div class="bg-background border border-border rounded-2xl shadow-lg p-3.5 inline-block">
     <!-- Header -->
     <div class="flex items-center justify-between mb-3">
       <button 
         @click="prevMonth" 
         type="button" 
-        class="p-1.5 hover:bg-muted rounded-md transition-colors text-muted-foreground hover:text-foreground"
+        class="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground"
       >
         <IconChevronLeft class="w-4 h-4" />
       </button>
-      <div class="text-sm font-semibold text-foreground px-2 py-1">
+      <div class="text-sm font-semibold text-foreground px-2 py-1 tabular-nums">
         {{ monthName }} {{ currentYear }}
       </div>
       <button 
         @click="nextMonth" 
         type="button" 
-        class="p-1.5 hover:bg-muted rounded-md transition-colors text-muted-foreground hover:text-foreground"
+        class="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground"
       >
         <IconChevronRight class="w-4 h-4" />
       </button>
     </div>
     
     <!-- Calendar Grid -->
-    <table class="w-full border-separate border-spacing-y-1">
+    <table class="w-full border-separate border-spacing-y-1 tabular-nums">
       <thead>
         <tr>
-          <th v-for="day in ['M', 'S', 'S', 'R', 'K', 'J', 'S']" :key="day" class="text-xs font-medium text-muted-foreground w-9 h-7 text-center">
+          <th v-for="(day, idx) in ['M', 'S', 'S', 'R', 'K', 'J', 'S']" :key="idx" class="text-xs font-medium text-muted-foreground w-9 h-7 text-center">
             {{ day }}
           </th>
         </tr>
@@ -37,14 +37,14 @@
               v-if="day"
               @click="selectDate(day.date)"
               type="button"
-              class="relative w-9 h-9 text-sm flex items-center justify-center font-medium rounded-lg transition-colors"
+              class="relative w-9 h-9 text-sm flex items-center justify-center font-medium rounded-lg"
               :class="[
                 isSameDay(day.date, modelValue) 
                   ? 'bg-foreground text-background shadow-subtle' 
                   : 'text-foreground hover:bg-muted',
-                !day.isCurrentMonth ? 'text-muted-foreground/50' : '',
+                !day.isCurrentMonth ? 'text-muted-foreground/40' : '',
                 isToday(day.date) && !isSameDay(day.date, modelValue) 
-                  ? 'bg-muted/50' : ''
+                  ? 'bg-muted/60' : ''
               ]"
             >
               {{ day.date.getDate() }}

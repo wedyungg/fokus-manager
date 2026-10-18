@@ -2,14 +2,14 @@
   <div class="space-y-6">
     <div class="flex justify-between items-center">
       <h2 class="text-2xl font-serif font-bold tracking-tight">Daftar Order</h2>
-      <NuxtLink to="/orders/create" class="bg-foreground text-background px-4 py-2 rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors flex items-center shadow-subtle">
+      <NuxtLink to="/orders/create" class="bg-foreground text-background px-4 py-2 rounded-xl text-sm font-medium hover:bg-foreground/90 flex items-center shadow-subtle tactile-press">
         <IconPlus class="w-4 h-4 mr-2" /> Order Baru
       </NuxtLink>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <div class="w-8 h-8 border-4 border-muted-foreground/30 border-t-foreground rounded-full animate-spin"></div>
+      <div class="w-6 h-6 border-2 border-muted-foreground/30 border-t-foreground rounded-full animate-spin"></div>
     </div>
 
     <!-- Error State -->
@@ -18,41 +18,41 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="orders.length === 0" class="bg-background border border-border rounded-2xl p-10 text-center shadow-subtle">
+    <div v-else-if="orders.length === 0" class="bg-background border border-border rounded-2xl p-10 text-center shadow-subtle max-w-lg mx-auto">
       <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
         <IconBriefcase class="w-8 h-8 text-muted-foreground" />
       </div>
       <h3 class="font-medium text-lg mb-1">Belum ada order</h3>
       <p class="text-muted-foreground text-sm mb-6">Mulai alur kerja Anda dengan membuat order pertama.</p>
-      <NuxtLink to="/orders/create" class="inline-flex items-center text-sm font-medium bg-foreground text-background px-4 py-2 rounded-xl hover:bg-foreground/90 transition-colors">
+      <NuxtLink to="/orders/create" class="inline-flex items-center text-sm font-medium bg-foreground text-background px-4 py-2.5 rounded-xl hover:bg-foreground/90 tactile-press">
         <IconPlus class="w-4 h-4 mr-2" /> Buat Order
       </NuxtLink>
     </div>
 
-    <!-- Order List -->
-    <div v-else class="grid gap-4">
+    <!-- Order List: Responsive 1 col on mobile, 2 on tablet, 3 on PC -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <NuxtLink 
         v-for="order in orders" 
         :key="order.id"
         :to="`/orders/${order.id}`"
-        class="bg-background border border-border rounded-2xl p-5 hover:border-foreground/30 hover:shadow-subtle transition-all block group"
+        class="bg-background border border-border rounded-2xl p-5 hover:border-foreground/30 hover:shadow-subtle tactile-press flex flex-col justify-between group"
       >
-        <div class="flex justify-between items-start mb-3">
-          <div>
-            <h3 class="font-serif text-lg font-semibold group-hover:text-muted-foreground transition-colors">{{ order.client_name }}</h3>
-            <p class="text-sm text-muted-foreground">{{ order.service_type }}</p>
+        <div class="flex justify-between items-start gap-3 mb-4">
+          <div class="min-w-0">
+            <h3 class="font-serif text-lg font-semibold group-hover:text-muted-foreground transition-colors duration-150 truncate">{{ order.client_name }}</h3>
+            <p class="text-sm text-muted-foreground truncate">{{ order.service_type }}</p>
           </div>
           <span 
-            class="px-2.5 py-1 text-xs font-medium rounded-full border"
+            class="px-2.5 py-1 text-xs font-medium rounded-full border shrink-0"
             :class="order.status === 'done' ? 'bg-foreground text-background border-foreground' : 'bg-muted text-foreground border-border'"
           >
             {{ order.status === 'done' ? 'Selesai' : 'Aktif' }}
           </span>
         </div>
         
-        <div class="flex items-center text-sm text-muted-foreground">
-          <IconCalendar class="w-4 h-4 mr-2" />
-          {{ formatDate(order.event_date) }}
+        <div class="flex items-center text-sm text-muted-foreground pt-2 border-t border-border/50">
+          <IconCalendar class="w-4 h-4 mr-2 shrink-0" />
+          <span class="truncate">{{ formatDate(order.event_date) }}</span>
         </div>
       </NuxtLink>
     </div>
@@ -95,11 +95,17 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('id-ID', options)
 }
 
-onMounted(() => {
-  if (!user.value) {
-    navigateTo('/login')
+onMounted(async () => {
+  if (user.value) {
+    fetchOrders()
+    return
+  }
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) {
+    navigateTo('/login', { replace: true })
   } else {
     fetchOrders()
   }
 })
 </script>
+

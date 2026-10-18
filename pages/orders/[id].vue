@@ -2,30 +2,30 @@
   <div class="space-y-6">
     <div class="flex items-start justify-between mb-2">
       <div>
-        <h2 class="text-2xl font-serif font-bold tracking-tight leading-tight">{{ order?.client_name || 'Loading...' }}</h2>
-        <p class="text-sm text-muted-foreground">{{ order?.service_type }} • {{ formatDate(order?.event_date) }}</p>
+        <h2 class="text-2xl md:text-3xl font-serif font-bold tracking-tight leading-tight">{{ order?.client_name || 'Loading...' }}</h2>
+        <p class="text-sm text-muted-foreground mt-0.5">{{ order?.service_type }} • {{ formatDate(order?.event_date) }}</p>
         <div v-if="order?.location || order?.client_phone" class="flex flex-wrap gap-3 mt-2">
           <span v-if="order?.location" class="text-xs text-muted-foreground flex items-center">
-            <IconMapPin class="w-3 h-3 mr-1" /> {{ order.location }}
+            <IconMapPin class="w-3.5 h-3.5 mr-1" /> {{ order.location }}
           </span>
           <a v-if="order?.client_phone" :href="`https://wa.me/${order.client_phone.replace(/[^0-9]/g, '')}`" target="_blank" rel="noopener" class="text-xs text-green-600 dark:text-green-400 flex items-center hover:underline">
-            <IconPhone class="w-3 h-3 mr-1" /> {{ order.client_phone }}
+            <IconPhone class="w-3.5 h-3.5 mr-1" /> {{ order.client_phone }}
           </a>
         </div>
       </div>
-      <div v-if="order?.status === 'done'" class="bg-foreground text-background text-[10px] font-bold px-2 py-1 rounded-md tracking-wider uppercase">
+      <div v-if="order?.status === 'done'" class="bg-foreground text-background text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider uppercase shrink-0">
         Selesai
       </div>
     </div>
     
     <!-- Link Selection Box for Client (Visible when done) -->
-    <div v-if="order?.status === 'done' && order?.client_selection_link" class="bg-blue-50 border border-blue-100 dark:bg-blue-950/30 dark:border-blue-900 rounded-xl p-4 mb-4 shadow-subtle">
+    <div v-if="order?.status === 'done' && order?.client_selection_link" class="bg-blue-50 border border-blue-100 dark:bg-blue-950/30 dark:border-blue-900 rounded-xl p-4 mb-4 shadow-subtle max-w-2xl">
       <h3 class="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider mb-2 flex items-center">
         <IconLink class="w-3.5 h-3.5 mr-1" /> Link Pemilihan Foto Klien
       </h3>
       <div class="flex items-center gap-2">
         <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-white dark:bg-black/20 border border-blue-200 dark:border-blue-800 text-xs px-3 py-2 rounded-lg text-muted-foreground outline-none cursor-text select-all" />
-        <button @click="copyLink(order.client_selection_link)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shadow-sm active:scale-95">
+        <button @click="copyLink(order.client_selection_link)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap shadow-sm">
           {{ copied ? 'Tersalin!' : 'Copy' }}
         </button>
       </div>
@@ -34,7 +34,7 @@
 
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-12">
-      <div class="w-8 h-8 border-4 border-muted-foreground/30 border-t-foreground rounded-full animate-spin"></div>
+      <div class="w-6 h-6 border-2 border-muted-foreground/30 border-t-foreground rounded-full animate-spin"></div>
     </div>
 
     <template v-else-if="order">
@@ -42,28 +42,28 @@
       <div class="flex gap-2 pb-2 overflow-x-auto snap-x hide-scrollbar">
         <button 
           @click="activeTab = 'shotlist'"
-          class="snap-start whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium transition-all"
+          class="snap-start whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium"
           :class="activeTab === 'shotlist' ? 'bg-foreground text-background shadow-subtle' : 'bg-muted text-muted-foreground hover:bg-muted/80'"
         >
           Shotlist
         </button>
         <button 
           @click="activeTab = 'finance'"
-          class="snap-start whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center"
+          class="snap-start whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium flex items-center"
           :class="activeTab === 'finance' ? 'bg-foreground text-background shadow-subtle' : 'bg-muted text-muted-foreground hover:bg-muted/80'"
         >
           <IconDollarSign class="w-4 h-4 mr-1.5" /> Finansial
         </button>
         <button 
           @click="activeTab = 'drive'"
-          class="snap-start whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center"
+          class="snap-start whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium flex items-center"
           :class="activeTab === 'drive' ? 'bg-foreground text-background shadow-subtle' : 'bg-muted text-muted-foreground hover:bg-muted/80'"
         >
           <IconLink class="w-4 h-4 mr-1.5" /> Link Drive
         </button>
         <NuxtLink 
           to="/references"
-          class="snap-start whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-all flex items-center"
+          class="snap-start whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium bg-muted text-muted-foreground hover:bg-muted/80 flex items-center tactile-press"
         >
           <IconImage class="w-4 h-4 mr-1.5" /> Referensi
         </NuxtLink>
@@ -75,24 +75,24 @@
         <div class="bg-background border border-border p-5 rounded-2xl shadow-subtle mb-6">
           <div class="flex justify-between text-sm mb-3">
             <span class="font-medium">Progress Lapangan</span>
-            <span class="font-medium">{{ progressPercentage }}%</span>
+            <span class="font-medium tabular-nums">{{ progressPercentage }}%</span>
           </div>
           <div class="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-            <div class="bg-foreground h-1.5 rounded-full transition-all duration-500 ease-out" :style="{ width: `${progressPercentage}%` }"></div>
+            <div class="bg-foreground h-1.5 rounded-full transition-[width] duration-300 ease-emil-out" :style="{ width: `${progressPercentage}%` }"></div>
           </div>
-          <p class="text-xs text-muted-foreground mt-3">{{ completedTasksCount }} dari {{ tasks.length }} momen terekam</p>
+          <p class="text-xs text-muted-foreground mt-3 tabular-nums">{{ completedTasksCount }} dari {{ tasks.length }} momen terekam</p>
         </div>
 
-        <!-- Shotlist Categories -->
-        <div class="space-y-6">
-          <div v-for="category in ['Wajib', 'Secondary', 'Kreatif']" :key="category">
+        <!-- Shotlist Categories: Responsive grid on large screens -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <template v-for="category in ['Wajib', 'Secondary', 'Kreatif']" :key="category">
             <div v-if="tasksByCategory[category] && tasksByCategory[category].length > 0">
               <h3 class="font-serif text-lg font-semibold mb-3 flex items-center">
                 <IconStar v-if="category === 'Wajib'" class="w-4 h-4 mr-2 text-foreground" />
                 <IconCircle v-else-if="category === 'Secondary'" class="w-4 h-4 mr-2 text-muted-foreground" />
                 <IconSparkles v-else-if="category === 'Kreatif'" class="w-4 h-4 mr-2 text-foreground" />
                 {{ category }}
-                <span class="ml-2 px-2 py-0.5 text-[10px] font-sans bg-muted text-muted-foreground rounded-full">
+                <span class="ml-2 px-2 py-0.5 text-[10px] font-sans bg-muted text-muted-foreground rounded-full tabular-nums">
                   {{ tasksByCategory[category].filter(t => t.is_completed).length }}/{{ tasksByCategory[category].length }}
                 </span>
               </h3>
@@ -102,16 +102,16 @@
                   v-for="(task, index) in tasksByCategory[category]" 
                   :key="task.id"
                   @click="toggleTask(task)"
-                  class="flex items-center p-4 cursor-pointer hover:bg-muted/30 transition-colors group"
+                  class="flex items-center p-4 cursor-pointer hover:bg-muted/40 active:bg-muted/70 transition-colors duration-150 group select-none"
                   :class="{ 'border-t border-border': index !== 0 }"
                 >
-                  <div class="mr-4 transition-transform group-hover:scale-110">
-                    <IconCheckCircle2 v-if="task.is_completed" class="w-5 h-5 text-foreground transition-all" />
-                    <IconCircle v-else class="w-5 h-5 text-muted-foreground transition-all group-hover:text-foreground" />
+                  <div class="mr-3.5 transition-transform duration-150 ease-emil-out group-active:scale-90">
+                    <IconCheckCircle2 v-if="task.is_completed" class="w-5 h-5 text-foreground" />
+                    <IconCircle v-else class="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors duration-150" />
                   </div>
-                  <div class="flex-1">
+                  <div class="flex-1 min-w-0">
                     <span 
-                      class="block text-sm font-medium transition-all"
+                      class="block text-sm font-medium transition-colors duration-150"
                       :class="task.is_completed ? 'text-muted-foreground line-through opacity-60' : 'text-foreground'"
                     >
                       {{ task.task_name }}
@@ -123,22 +123,24 @@
                 </div>
               </div>
             </div>
-          </div>
+          </template>
         </div>
       </div>
-      <div v-else-if="activeTab === 'finance'" class="space-y-6">
-        <div class="bg-background border border-border p-5 rounded-2xl shadow-subtle space-y-4">
+
+      <!-- Finance Tab: 2 columns side-by-side on desktop -->
+      <div v-else-if="activeTab === 'finance'" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div class="bg-background border border-border p-5 md:p-6 rounded-2xl shadow-subtle space-y-4">
           <div class="flex justify-between items-center border-b border-border pb-4 mb-4">
             <h3 class="font-serif text-lg font-semibold">Input Keuangan</h3>
             <div v-if="order" class="flex items-center bg-muted rounded-lg p-1 text-xs">
               <button 
                 @click="updatePaymentStatus('dp')"
-                class="px-3 py-1.5 rounded-md font-medium transition-all"
+                class="px-3 py-1.5 rounded-md font-medium"
                 :class="order.payment_status === 'dp' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
               >DP</button>
               <button 
                 @click="updatePaymentStatus('lunas')"
-                class="px-3 py-1.5 rounded-md font-medium transition-all"
+                class="px-3 py-1.5 rounded-md font-medium"
                 :class="order.payment_status === 'lunas' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
               >Lunas</button>
             </div>
@@ -152,7 +154,7 @@
                 @input="handleGrossInput"
                 type="text" 
                 inputmode="numeric"
-                class="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
+                class="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out tabular-nums"
               />
             </div>
           </div>
@@ -160,7 +162,7 @@
           <div>
             <div class="flex justify-between items-center mb-2">
               <label class="block text-sm font-medium">Biaya Operasional (Uang Keluar)</label>
-              <button @click="addExpense" class="text-xs px-3 py-1.5 bg-foreground text-background rounded-lg font-medium shadow-subtle hover:bg-foreground/90 transition-colors flex items-center">
+              <button @click="addExpense" class="text-xs px-3 py-1.5 bg-foreground text-background rounded-lg font-medium shadow-subtle hover:bg-foreground/90 flex items-center">
                 <IconPlus class="w-3 h-3 mr-1" /> Tambah
               </button>
             </div>
@@ -170,7 +172,7 @@
                 <input 
                   v-model="exp.name" 
                   placeholder="Misal: Bensin" 
-                  class="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-foreground transition-all" 
+                  class="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out" 
                 />
                 <div class="relative w-2/5">
                   <span class="absolute left-3 top-2.5 text-xs text-muted-foreground">Rp</span>
@@ -180,12 +182,12 @@
                     type="text" 
                     inputmode="numeric"
                     placeholder="0"
-                    class="w-full pl-8 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-red-500 transition-all text-red-500 font-mono" 
+                    class="w-full pl-8 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-red-500 transition-[border-color,box-shadow] duration-150 ease-emil-out text-red-500 font-mono tabular-nums" 
                   />
                 </div>
                 <button 
                   @click="removeExpense(idx)" 
-                  class="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                  class="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg"
                   title="Hapus"
                 >
                   <IconTrash2 class="w-4 h-4" />
@@ -199,7 +201,7 @@
             
             <div class="flex justify-between items-center mt-3 p-3 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-100 dark:border-red-900/50">
               <span class="text-sm font-medium text-red-600 dark:text-red-400">Total Pengeluaran</span>
-              <span class="text-sm font-bold text-red-600 dark:text-red-400 font-mono">-{{ formatCurrency(financeData.expenses) }}</span>
+              <span class="text-sm font-bold text-red-600 dark:text-red-400 font-mono tabular-nums">-{{ formatCurrency(financeData.expenses) }}</span>
             </div>
           </div>
 
@@ -207,7 +209,7 @@
             <button 
               @click="saveFinance" 
               :disabled="savingFinance"
-              class="w-full py-3 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 transition-all flex justify-center items-center disabled:opacity-70"
+              class="w-full py-3 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 flex justify-center items-center disabled:opacity-70"
             >
               <span v-if="savingFinance" class="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2"></span>
               {{ savingFinance ? 'Menyimpan...' : 'Simpan Data Keuangan' }}
@@ -225,7 +227,7 @@
           </div>
           
           <!-- Bruto & Expenses Summary -->
-          <div class="space-y-2 mb-4 font-mono text-sm border-b border-dashed border-border/60 pb-4">
+          <div class="space-y-2 mb-4 font-mono text-sm border-b border-dashed border-border/60 pb-4 tabular-nums">
             <div class="flex justify-between">
               <span class="text-muted-foreground">BRUTO</span>
               <span>{{ formatCurrency(financeData.total_gross) }}</span>
@@ -239,14 +241,14 @@
           <!-- Nett Profit -->
           <div class="flex justify-between items-center mb-6 pb-6 border-b-2 border-border/80">
             <span class="text-sm font-bold uppercase tracking-wider">Nett Profit</span>
-            <span class="font-bold text-xl font-mono">{{ formatCurrency(financeData.net_profit) }}</span>
+            <span class="font-bold text-xl font-mono tabular-nums">{{ formatCurrency(financeData.net_profit) }}</span>
           </div>
           
           <!-- Splits -->
           <div class="space-y-4">
             <div class="flex justify-between items-center group">
               <div class="flex items-center">
-                <div class="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mr-3 border border-border/50 group-hover:bg-foreground group-hover:text-background transition-colors">
+                <div class="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mr-3 border border-border/50 group-hover:bg-foreground group-hover:text-background transition-colors duration-150">
                   <IconUsers class="w-4 h-4" />
                 </div>
                 <div>
@@ -254,12 +256,12 @@
                   <div class="text-[10px] text-muted-foreground uppercase tracking-widest">30% • Fee Tim</div>
                 </div>
               </div>
-              <span class="font-mono font-medium">{{ formatCurrency(splits.pekerja) }}</span>
+              <span class="font-mono font-medium tabular-nums">{{ formatCurrency(splits.pekerja) }}</span>
             </div>
             
             <div class="flex justify-between items-center group">
               <div class="flex items-center">
-                <div class="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mr-3 border border-border/50 group-hover:bg-foreground group-hover:text-background transition-colors">
+                <div class="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mr-3 border border-border/50 group-hover:bg-foreground group-hover:text-background transition-colors duration-150">
                   <IconCamera class="w-4 h-4" />
                 </div>
                 <div>
@@ -267,12 +269,12 @@
                   <div class="text-[10px] text-muted-foreground uppercase tracking-widest">30% • Maintenance</div>
                 </div>
               </div>
-              <span class="font-mono font-medium">{{ formatCurrency(splits.alat) }}</span>
+              <span class="font-mono font-medium tabular-nums">{{ formatCurrency(splits.alat) }}</span>
             </div>
             
             <div class="flex justify-between items-center group">
               <div class="flex items-center">
-                <div class="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mr-3 border border-border/50 group-hover:bg-foreground group-hover:text-background transition-colors">
+                <div class="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mr-3 border border-border/50 group-hover:bg-foreground group-hover:text-background transition-colors duration-150">
                   <IconBriefcase class="w-4 h-4" />
                 </div>
                 <div>
@@ -280,12 +282,12 @@
                   <div class="text-[10px] text-muted-foreground uppercase tracking-widest">30% • Manajemen</div>
                 </div>
               </div>
-              <span class="font-mono font-medium">{{ formatCurrency(splits.mitra) }}</span>
+              <span class="font-mono font-medium tabular-nums">{{ formatCurrency(splits.mitra) }}</span>
             </div>
             
             <div class="flex justify-between items-center group">
               <div class="flex items-center">
-                <div class="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mr-3 border border-border/50 group-hover:bg-foreground group-hover:text-background transition-colors">
+                <div class="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center mr-3 border border-border/50 group-hover:bg-foreground group-hover:text-background transition-colors duration-150">
                   <IconWallet class="w-4 h-4" />
                 </div>
                 <div>
@@ -293,7 +295,7 @@
                   <div class="text-[10px] text-muted-foreground uppercase tracking-widest">10% • Investor</div>
                 </div>
               </div>
-              <span class="font-mono font-medium">{{ formatCurrency(splits.pemodal) }}</span>
+              <span class="font-mono font-medium tabular-nums">{{ formatCurrency(splits.pemodal) }}</span>
             </div>
           </div>
           
@@ -302,8 +304,9 @@
           </div>
         </div>
       </div>
-      <div v-else-if="activeTab === 'drive'" class="space-y-6">
-        <div class="bg-background border border-border p-5 rounded-2xl shadow-subtle space-y-4">
+
+      <div v-else-if="activeTab === 'drive'" class="space-y-6 max-w-2xl">
+        <div class="bg-background border border-border p-5 md:p-6 rounded-2xl shadow-subtle space-y-4">
           <div class="flex justify-between items-center border-b border-border pb-4 mb-4">
             <h3 class="font-serif text-lg font-semibold">Generate Link Klien</h3>
           </div>
@@ -312,7 +315,7 @@
              <p class="text-sm text-blue-800 dark:text-blue-300 mb-2 font-medium">Link Pemilihan Klien Aktif:</p>
              <div class="flex items-center gap-2">
                <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-white dark:bg-black/20 border border-blue-200 dark:border-blue-800 text-xs px-3 py-2 rounded-lg text-muted-foreground outline-none cursor-text select-all" />
-               <button @click="copyLink(order.client_selection_link)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap shadow-sm active:scale-95">
+               <button @click="copyLink(order.client_selection_link)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap shadow-sm">
                  {{ copied ? 'Tersalin!' : 'Copy' }}
                </button>
              </div>
@@ -321,11 +324,11 @@
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium mb-1">Link Google Drive Baru / Update</label>
-              <input v-model="completionForm.driveLink" type="text" placeholder="https://drive.google.com/drive/folders/..." class="w-full px-4 py-3 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all" />
+              <input v-model="completionForm.driveLink" type="text" placeholder="https://drive.google.com/drive/folders/..." class="w-full px-4 py-3 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out" />
             </div>
             <div>
               <label class="block text-sm font-medium mb-1">Kuota Pilih Foto</label>
-              <input v-model.number="completionForm.maxSelections" type="number" placeholder="50" class="w-full px-4 py-3 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all" />
+              <input v-model.number="completionForm.maxSelections" type="number" placeholder="50" class="w-full px-4 py-3 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out tabular-nums" />
             </div>
           </div>
           
@@ -333,7 +336,7 @@
             <button 
               @click="submitCompletion" 
               :disabled="completingOrder || !completionForm.driveLink || !completionForm.maxSelections"
-              class="w-full py-3 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed"
+              class="w-full py-3 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
               <span v-if="completingOrder" class="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2"></span>
               {{ completingOrder ? 'Memproses...' : 'Generate / Update Link' }}
@@ -343,10 +346,10 @@
       </div>
       
       <!-- Complete Order Button -->
-      <div v-if="order && order.status !== 'done'" class="mt-8 pt-4 border-t border-border">
+      <div v-if="order && order.status !== 'done'" class="mt-8 pt-4 border-t border-border max-w-md mx-auto">
         <button 
           @click="markOrderDone"
-          class="w-full py-4 bg-foreground text-background rounded-2xl font-bold tracking-wide hover:bg-foreground/90 transition-all flex justify-center items-center shadow-lg active:scale-[0.98]"
+          class="w-full py-4 bg-foreground text-background rounded-2xl font-bold tracking-wide hover:bg-foreground/90 flex justify-center items-center shadow-lg"
         >
           <IconCheckCircle2 class="w-5 h-5 mr-2" /> TANDAI TELAH SELESAI
         </button>

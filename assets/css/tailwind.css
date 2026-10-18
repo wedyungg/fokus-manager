@@ -9,12 +9,17 @@
     --color-muted: 245 245 245;
     --color-muted-foreground: 115 115 115;
     --color-border: 229 229 229;
+
+    /* Emil Kowalski Design Engineering Easing Curves */
+    --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .dark {
     --color-background: 10 10 10;
     --color-foreground: 250 250 250;
-    --color-muted: 38 38 38;
+    --color-muted: 28 28 28;
     --color-muted-foreground: 163 163 163;
     --color-border: 38 38 38;
   }
@@ -23,9 +28,55 @@
 @layer base {
   body {
     @apply bg-background text-foreground antialiased selection:bg-foreground selection:text-background font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-tap-highlight-color: transparent;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif tracking-tight;
+    text-wrap: balance;
+  }
+
+  /* Responsive tactile feedback for interactive elements (Emil Design Principle) */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    transition: transform 150ms var(--ease-out-strong), background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease, box-shadow 150ms var(--ease-out-strong);
+  }
+
+  button:not(:disabled):active,
+  [role="button"]:not(:disabled):active {
+    transform: scale(0.97);
   }
 }
+
+@layer utilities {
+  .ease-emil-out {
+    transition-timing-function: var(--ease-out-strong);
+  }
+  .ease-emil-in-out {
+    transition-timing-function: var(--ease-in-out-strong);
+  }
+  .ease-emil-drawer {
+    transition-timing-function: var(--ease-drawer);
+  }
+  .tactile-press {
+    transition: transform 150ms var(--ease-out-strong), border-color 180ms var(--ease-out-strong), box-shadow 180ms var(--ease-out-strong), background-color 150ms ease;
+  }
+  .tactile-press:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Smooth Origin-Aware Popover & Page Transitions */
+.popover-enter-active,
+.popover-leave-active {
+  transition: opacity 180ms var(--ease-out-strong), transform 180ms var(--ease-out-strong), filter 180ms var(--ease-out-strong);
+}
+
+.popover-enter-from,
+.popover-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-4px);
+  filter: blur(2px);
+}
+

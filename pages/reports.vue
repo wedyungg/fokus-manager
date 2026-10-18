@@ -4,10 +4,10 @@
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sticky top-16 z-10 bg-background/90 backdrop-blur pt-2 pb-3 border-b border-border">
       <h2 class="text-2xl font-serif font-bold tracking-tight">Laporan Bulanan</h2>
       <div class="flex gap-2">
-        <select v-model="selectedMonth" class="bg-muted text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-foreground transition-all font-medium">
+        <select v-model="selectedMonth" class="bg-muted text-sm rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out font-medium cursor-pointer">
           <option v-for="(m, i) in months" :key="i" :value="i">{{ m }}</option>
         </select>
-        <select v-model="selectedYear" class="bg-muted text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-foreground transition-all font-medium">
+        <select v-model="selectedYear" class="bg-muted text-sm rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out font-medium cursor-pointer tabular-nums">
           <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
         </select>
       </div>
@@ -15,42 +15,46 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <div class="w-8 h-8 border-4 border-muted-foreground/30 border-t-foreground rounded-full animate-spin"></div>
+      <div class="w-6 h-6 border-2 border-muted-foreground/30 border-t-foreground rounded-full animate-spin"></div>
     </div>
 
     <template v-else>
-      <!-- Global Report Card -->
-      <div class="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-neutral-800 dark:to-neutral-900 text-foreground rounded-3xl p-6 shadow-subtle relative overflow-hidden border border-border">
-        <p class="text-muted-foreground text-sm font-medium mb-1">Total Net Profit</p>
-        <h3 class="text-4xl font-serif font-bold mb-6 tracking-tight text-foreground">{{ formatCurrency(totals.netProfit) }}</h3>
-        
-        <div class="grid grid-cols-2 gap-4 border-t border-border pt-4">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <!-- Global Report Card -->
+        <div class="lg:col-span-5 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-neutral-800 dark:to-neutral-900 text-foreground rounded-3xl p-6 shadow-subtle relative overflow-hidden border border-border flex flex-col justify-between">
           <div>
-            <p class="text-muted-foreground text-xs font-medium mb-1">Total Omzet (Bruto)</p>
-            <p class="font-semibold text-foreground">{{ formatCurrency(totals.gross) }}</p>
+            <p class="text-muted-foreground text-sm font-medium mb-1">Total Net Profit</p>
+            <h3 class="text-3xl md:text-4xl font-serif font-bold mb-6 tracking-tight text-foreground tabular-nums">{{ formatCurrency(totals.netProfit) }}</h3>
           </div>
-          <div>
-            <p class="text-muted-foreground text-xs font-medium mb-1">Total Operasional</p>
-            <p class="font-semibold text-foreground">{{ formatCurrency(totals.expenses) }}</p>
+          
+          <div class="grid grid-cols-2 gap-4 border-t border-border pt-4 tabular-nums">
+            <div>
+              <p class="text-muted-foreground text-xs font-medium mb-1">Total Omzet (Bruto)</p>
+              <p class="font-semibold text-foreground">{{ formatCurrency(totals.gross) }}</p>
+            </div>
+            <div>
+              <p class="text-muted-foreground text-xs font-medium mb-1">Total Operasional</p>
+              <p class="font-semibold text-foreground">{{ formatCurrency(totals.expenses) }}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Chart -->
-      <div class="bg-background border border-border p-5 rounded-3xl shadow-subtle">
-        <h3 class="font-serif text-lg font-bold mb-4">Tren Profit Harian</h3>
-        <div class="h-48">
-          <Line :data="chartData" :options="chartOptions" v-if="chartData.labels.length > 0" />
-          <div v-else class="h-full flex items-center justify-center text-muted-foreground text-sm">
-            Tidak ada data untuk grafik bulan ini.
+        <!-- Chart -->
+        <div class="lg:col-span-7 bg-background border border-border p-5 md:p-6 rounded-3xl shadow-subtle flex flex-col justify-between">
+          <h3 class="font-serif text-lg font-bold mb-4">Tren Profit Harian</h3>
+          <div class="h-48 w-full">
+            <Line :data="chartData" :options="chartOptions" v-if="chartData.labels.length > 0" />
+            <div v-else class="h-full flex items-center justify-center text-muted-foreground text-sm">
+              Tidak ada data untuk grafik bulan ini.
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Akumulasi Bagi Hasil -->
-      <div class="bg-background border border-border p-5 rounded-3xl shadow-subtle">
+      <div class="bg-background border border-border p-5 md:p-6 rounded-3xl shadow-subtle">
         <h3 class="font-serif text-lg font-bold mb-4">Akumulasi Bagi Hasil</h3>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 tabular-nums">
           <div class="bg-muted p-4 rounded-2xl">
             <p class="text-xs text-muted-foreground font-medium mb-1">Pekerja (30%)</p>
             <p class="font-bold">{{ formatCurrency(totals.netProfit * 0.3) }}</p>
@@ -78,44 +82,46 @@
           <p class="text-muted-foreground text-sm">Tidak ada order yang 'Selesai' di bulan ini.</p>
         </div>
 
-        <div v-for="order in orders" :key="order.id" class="bg-background border border-border rounded-3xl p-5 shadow-subtle">
-          <NuxtLink :to="`/orders/${order.id}`" class="flex justify-between items-start mb-4 group hover:bg-muted/50 p-2 -mx-2 rounded-xl transition-colors">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <h4 class="font-semibold text-base group-hover:text-muted-foreground transition-colors">{{ order.client_name }}</h4>
-                <span 
-                  class="px-2 py-0.5 text-[10px] font-medium rounded-md uppercase tracking-wider"
-                  :class="order.payment_status === 'lunas' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'"
-                >
-                  {{ order.payment_status === 'lunas' ? 'Lunas' : 'DP' }}
-                </span>
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-for="order in orders" :key="order.id" class="bg-background border border-border rounded-3xl p-5 shadow-subtle flex flex-col justify-between">
+            <NuxtLink :to="`/orders/${order.id}`" class="flex justify-between items-start mb-4 group hover:bg-muted/50 p-2 -mx-2 rounded-xl transition-colors duration-150 tactile-press">
+              <div class="min-w-0 pr-2">
+                <div class="flex items-center gap-2 mb-1">
+                  <h4 class="font-semibold text-base group-hover:text-muted-foreground transition-colors duration-150 truncate">{{ order.client_name }}</h4>
+                  <span 
+                    class="px-2 py-0.5 text-[10px] font-medium rounded-md uppercase tracking-wider shrink-0"
+                    :class="order.payment_status === 'lunas' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'"
+                  >
+                    {{ order.payment_status === 'lunas' ? 'Lunas' : 'DP' }}
+                  </span>
+                </div>
+                <p class="text-xs text-muted-foreground truncate">{{ formatDate(order.event_date) }} • {{ order.service_type }}</p>
               </div>
-              <p class="text-xs text-muted-foreground">{{ formatDate(order.event_date) }} • {{ order.service_type }}</p>
+              <div class="text-right shrink-0">
+                <p class="text-xs text-muted-foreground mb-0.5">Net Profit</p>
+                <p class="font-bold text-sm bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded tabular-nums">{{ formatCurrency(order.finance?.net_profit || 0) }}</p>
+              </div>
+            </NuxtLink>
+            
+            <!-- Checkboxes for Payment Tracking -->
+            <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-border tabular-nums">
+              <label class="flex items-center space-x-2 text-sm cursor-pointer">
+                <input type="checkbox" v-model="order.finance.is_paid_pekerja" @change="updatePayment(order.finance.id, 'is_paid_pekerja', order.finance.is_paid_pekerja)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
+                <span :class="{'text-muted-foreground': !isAdmin}" class="truncate">Pekerja <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.3)}})</span></span>
+              </label>
+              <label class="flex items-center space-x-2 text-sm cursor-pointer">
+                <input type="checkbox" v-model="order.finance.is_paid_alat" @change="updatePayment(order.finance.id, 'is_paid_alat', order.finance.is_paid_alat)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
+                <span :class="{'text-muted-foreground': !isAdmin}" class="truncate">Alat <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.3)}})</span></span>
+              </label>
+              <label class="flex items-center space-x-2 text-sm cursor-pointer">
+                <input type="checkbox" v-model="order.finance.is_paid_mitra" @change="updatePayment(order.finance.id, 'is_paid_mitra', order.finance.is_paid_mitra)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
+                <span :class="{'text-muted-foreground': !isAdmin}" class="truncate">Mitra <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.3)}})</span></span>
+              </label>
+              <label class="flex items-center space-x-2 text-sm cursor-pointer">
+                <input type="checkbox" v-model="order.finance.is_paid_pemodal" @change="updatePayment(order.finance.id, 'is_paid_pemodal', order.finance.is_paid_pemodal)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
+                <span :class="{'text-muted-foreground': !isAdmin}" class="truncate">Pemodal <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.1)}})</span></span>
+              </label>
             </div>
-            <div class="text-right">
-              <p class="text-xs text-muted-foreground mb-0.5">Net Profit</p>
-              <p class="font-bold text-sm bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded">{{ formatCurrency(order.finance?.net_profit || 0) }}</p>
-            </div>
-          </NuxtLink>
-          
-          <!-- Checkboxes for Payment Tracking -->
-          <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-border">
-            <label class="flex items-center space-x-2 text-sm">
-              <input type="checkbox" v-model="order.finance.is_paid_pekerja" @change="updatePayment(order.finance.id, 'is_paid_pekerja', order.finance.is_paid_pekerja)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
-              <span :class="{'text-muted-foreground': !isAdmin}">Pekerja <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.3)}})</span></span>
-            </label>
-            <label class="flex items-center space-x-2 text-sm">
-              <input type="checkbox" v-model="order.finance.is_paid_alat" @change="updatePayment(order.finance.id, 'is_paid_alat', order.finance.is_paid_alat)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
-              <span :class="{'text-muted-foreground': !isAdmin}">Alat <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.3)}})</span></span>
-            </label>
-            <label class="flex items-center space-x-2 text-sm">
-              <input type="checkbox" v-model="order.finance.is_paid_mitra" @change="updatePayment(order.finance.id, 'is_paid_mitra', order.finance.is_paid_mitra)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
-              <span :class="{'text-muted-foreground': !isAdmin}">Mitra <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.3)}})</span></span>
-            </label>
-            <label class="flex items-center space-x-2 text-sm">
-              <input type="checkbox" v-model="order.finance.is_paid_pemodal" @change="updatePayment(order.finance.id, 'is_paid_pemodal', order.finance.is_paid_pemodal)" :disabled="!isAdmin" class="rounded border-border text-foreground focus:ring-foreground bg-background disabled:opacity-50" />
-              <span :class="{'text-muted-foreground': !isAdmin}">Pemodal <span class="text-xs opacity-70">({{formatCurrency((order.finance?.net_profit || 0)*0.1)}})</span></span>
-            </label>
           </div>
         </div>
       </div>
@@ -298,9 +304,14 @@ watch([selectedMonth, selectedYear], () => {
   fetchReportData()
 })
 
-onMounted(() => {
-  if (!user.value) {
-    navigateTo('/login')
+onMounted(async () => {
+  if (user.value) {
+    fetchReportData()
+    return
+  }
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) {
+    navigateTo('/login', { replace: true })
   } else {
     fetchReportData()
   }

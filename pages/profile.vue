@@ -2,66 +2,77 @@
   <div class="space-y-6">
     <h2 class="text-2xl font-serif font-bold tracking-tight mb-6">Profile</h2>
     
-    <div v-if="user" class="bg-background border border-border p-6 rounded-2xl shadow-subtle flex flex-col items-center">
-      <div class="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4 border border-border">
-        <IconUser class="w-10 h-10 text-muted-foreground" />
-      </div>
-      
-      <h3 class="font-serif text-xl font-bold">{{ user.email }}</h3>
-      <p class="text-muted-foreground text-sm mb-4 uppercase tracking-wider font-semibold">
-        <span v-if="loading" class="animate-pulse">Loading...</span>
-        <span v-else-if="profile?.role === 'admin'" class="text-amber-600 dark:text-amber-500">Administrator</span>
-        <span v-else>Staff / Editor</span>
-      </p>
-
-      <div v-if="profile?.role === 'admin'" class="w-full bg-gradient-to-br from-neutral-900 to-black text-white dark:from-neutral-800 dark:to-neutral-900 rounded-3xl p-6 mb-8 shadow-xl border border-neutral-800 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
-        <p class="text-white/60 text-xs font-medium mb-1 tracking-widest uppercase">Total Pendapatan Bersih Keseluruhan</p>
-        <h3 class="text-3xl font-serif font-bold mb-4 tracking-tight text-amber-400">
-          {{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net) }}
-        </h3>
-        
-        <div class="grid grid-cols-2 gap-4 mb-4">
-          <div class="bg-white/5 rounded-xl p-3 border border-white/10">
-            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Pekerja (30%)</p>
-            <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.30) }}</p>
+    <div v-if="user || profile" class="space-y-6">
+      <!-- User Info Card -->
+      <div class="bg-background border border-border p-6 md:p-8 rounded-2xl shadow-subtle flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+          <div class="w-16 h-16 md:w-20 md:h-20 bg-muted rounded-full flex items-center justify-center border border-border shrink-0">
+            <IconUser class="w-8 h-8 md:w-10 md:h-10 text-muted-foreground" />
           </div>
-          <div class="bg-white/5 rounded-xl p-3 border border-white/10">
-            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Alat (30%)</p>
-            <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.30) }}</p>
-          </div>
-          <div class="bg-white/5 rounded-xl p-3 border border-white/10">
-            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Mitra (30%)</p>
-            <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.30) }}</p>
-          </div>
-          <div class="bg-white/5 rounded-xl p-3 border border-white/10">
-            <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Pemodal (10%)</p>
-            <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.10) }}</p>
+          <div>
+            <h3 class="font-serif text-xl md:text-2xl font-bold">{{ user?.email }}</h3>
+            <p class="text-muted-foreground text-xs md:text-sm mt-1 uppercase tracking-wider font-semibold">
+              <span v-if="loading" class="animate-pulse">Loading...</span>
+              <span v-else-if="profile?.role === 'admin'" class="text-amber-600 dark:text-amber-500">Administrator</span>
+              <span v-else>Staff / Editor</span>
+            </p>
           </div>
         </div>
 
-        <div class="pt-4 border-t border-white/10">
-           <p class="text-white/50 text-xs font-medium mb-1">Total Omzet (Bruto)</p>
-           <p class="font-semibold text-white/90">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.gross) }}</p>
-        </div>
+        <button 
+          @click="handleLogout"
+          class="w-full sm:w-auto px-6 py-3 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 border border-red-100 dark:bg-red-950/30 dark:border-red-900 shrink-0"
+        >
+          Keluar (Logout)
+        </button>
       </div>
 
-      <div v-if="profile?.role === 'admin'" class="w-full bg-background border border-border p-5 rounded-3xl shadow-subtle mb-8">
-        <h3 class="font-serif text-lg font-bold mb-4">Tren Profit Bulanan</h3>
-        <div class="h-48">
-          <Line :data="chartData" :options="chartOptions" v-if="chartData.labels.length > 0" />
-          <div v-else class="h-full flex items-center justify-center text-muted-foreground text-sm">
-            Tidak ada data grafik.
+      <!-- Admin All-Time Revenue & Monthly Chart Grid -->
+      <div v-if="profile?.role === 'admin'" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div class="lg:col-span-6 w-full bg-gradient-to-br from-neutral-900 to-black text-white dark:from-neutral-800 dark:to-neutral-900 rounded-3xl p-6 shadow-xl border border-neutral-800 relative overflow-hidden flex flex-col justify-between">
+          <div>
+            <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+            <p class="text-white/60 text-xs font-medium mb-1 tracking-widest uppercase">Total Pendapatan Bersih Keseluruhan</p>
+            <h3 class="text-3xl md:text-4xl font-serif font-bold mb-6 tracking-tight text-amber-400 tabular-nums">
+              {{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net) }}
+            </h3>
+            
+            <div class="grid grid-cols-2 gap-3.5 mb-6 tabular-nums">
+              <div class="bg-white/5 rounded-xl p-3 border border-white/10">
+                <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Pekerja (30%)</p>
+                <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.30) }}</p>
+              </div>
+              <div class="bg-white/5 rounded-xl p-3 border border-white/10">
+                <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Alat (30%)</p>
+                <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.30) }}</p>
+              </div>
+              <div class="bg-white/5 rounded-xl p-3 border border-white/10">
+                <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Mitra (30%)</p>
+                <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.30) }}</p>
+              </div>
+              <div class="bg-white/5 rounded-xl p-3 border border-white/10">
+                <p class="text-white/50 text-[10px] font-medium mb-1 uppercase tracking-wider">Pemodal (10%)</p>
+                <p class="font-semibold text-white/90 text-sm">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.net * 0.10) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-white/10 tabular-nums">
+             <p class="text-white/50 text-xs font-medium mb-1">Total Omzet (Bruto)</p>
+             <p class="font-semibold text-white/90">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(revenue.gross) }}</p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 w-full bg-background border border-border p-6 rounded-3xl shadow-subtle flex flex-col justify-between">
+          <h3 class="font-serif text-lg font-bold mb-4">Tren Profit Bulanan</h3>
+          <div class="h-56 lg:h-64 w-full">
+            <Line :data="chartData" :options="chartOptions" v-if="chartData.labels.length > 0" />
+            <div v-else class="h-full flex items-center justify-center text-muted-foreground text-sm">
+              Tidak ada data grafik.
+            </div>
           </div>
         </div>
       </div>
-
-      <button 
-        @click="handleLogout"
-        class="w-full py-3 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-colors border border-red-100 dark:bg-red-950/30 dark:border-red-900"
-      >
-        Keluar (Logout)
-      </button>
     </div>
   </div>
 </template>
@@ -88,6 +99,7 @@ const fetchProfile = async () => {
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
     if (!authUser || !authUser.id) {
       debugError.value = "Failed to get auth user ID"
+      navigateTo('/login', { replace: true })
       return
     }
 
@@ -193,9 +205,14 @@ const chartOptions = {
   }
 }
 
-onMounted(() => {
-  if (!user.value) {
-    navigateTo('/login')
+onMounted(async () => {
+  if (user.value) {
+    fetchProfile()
+    return
+  }
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) {
+    navigateTo('/login', { replace: true })
   } else {
     fetchProfile()
   }
@@ -203,6 +220,7 @@ onMounted(() => {
 
 const handleLogout = async () => {
   await supabase.auth.signOut()
-  navigateTo('/login')
+  navigateTo('/login', { replace: true })
 }
 </script>
+

@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center justify-center min-h-[70vh]">
-    <div class="animate-pulse flex flex-col items-center">
-      <div class="w-8 h-8 border-4 border-foreground border-t-transparent rounded-full animate-spin mb-4"></div>
+    <div class="flex flex-col items-center">
+      <div class="w-6 h-6 border-2 border-foreground border-t-transparent rounded-full animate-spin mb-3"></div>
       <p class="text-sm text-muted-foreground">Memuat aplikasi...</p>
     </div>
   </div>
@@ -9,15 +9,21 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { useSupabaseUser, navigateTo } from '#imports'
+import { useSupabaseClient, useSupabaseUser, navigateTo } from '#imports'
 
+const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 
-onMounted(() => {
+onMounted(async () => {
   if (user.value) {
-    navigateTo('/orders')
+    return navigateTo('/orders', { replace: true })
+  }
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session) {
+    navigateTo('/orders', { replace: true })
   } else {
-    navigateTo('/login')
+    navigateTo('/login', { replace: true })
   }
 })
 </script>
+

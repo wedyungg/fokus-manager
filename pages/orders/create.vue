@@ -1,144 +1,160 @@
 <template>
-  <div class="space-y-6">
-    <div class="bg-background border border-border rounded-2xl p-6 shadow-subtle">
+  <div class="max-w-2xl mx-auto space-y-6">
+    <div>
+      <h2 class="text-2xl font-serif font-bold tracking-tight">Buat Order Baru</h2>
+      <p class="text-sm text-muted-foreground mt-1">Isi detail acara untuk menyiapkan shotlist dan data finansial otomatis.</p>
+    </div>
+
+    <div class="bg-background border border-border rounded-2xl p-6 md:p-8 shadow-subtle">
       <form @submit.prevent="submitOrder" class="space-y-5">
         <div>
-          <label class="block text-sm font-medium mb-1">Nama Klien / Judul Order</label>
+          <label class="block text-sm font-medium mb-1.5">Nama Klien / Judul Order</label>
           <input 
             v-model="form.client_name" 
             type="text" 
             required 
             placeholder="Contoh: Wedding Syita & Ita"
-            class="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
+            class="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out"
           />
         </div>
 
-        <div class="relative">
-          <label class="block text-sm font-medium mb-1">Tanggal Event</label>
-          <div 
-            @click="showDatePicker = true"
-            class="w-full px-4 py-3 rounded-xl border border-border bg-background hover:bg-muted/50 focus:ring-2 focus:ring-foreground transition-all cursor-pointer flex justify-between items-center"
-            :class="{ 'ring-2 ring-foreground': showDatePicker }"
-          >
-            <span :class="form.event_date ? 'text-foreground font-medium' : 'text-muted-foreground'">
-              {{ form.event_date ? formatDate(form.event_date) : 'Pilih tanggal...' }}
-            </span>
-            <IconCalendar class="w-5 h-5 text-muted-foreground" />
-          </div>
-          
-          <!-- Custom Date Picker Popover -->
-          <div v-if="showDatePicker" class="absolute z-50 mt-2 left-0 right-0 sm:right-auto">
-            <!-- Backdrop for closing -->
-            <div class="fixed inset-0 z-40 bg-transparent" @click="showDatePicker = false"></div>
-            <!-- Popover Content -->
-            <div class="relative z-50">
-              <UiDatePicker 
-                v-model="parsedDate" 
-                @select="handleDateSelect" 
-                class="w-full sm:w-auto"
-              />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="relative">
+            <label class="block text-sm font-medium mb-1.5">Tanggal Event</label>
+            <div 
+              @click="showDatePicker = !showDatePicker"
+              role="button"
+              tabindex="0"
+              class="w-full px-4 py-3 rounded-xl border border-border bg-background hover:bg-muted/50 focus:ring-2 focus:ring-foreground cursor-pointer flex justify-between items-center"
+              :class="{ 'ring-2 ring-foreground': showDatePicker }"
+            >
+              <span :class="form.event_date ? 'text-foreground font-medium' : 'text-muted-foreground'">
+                {{ form.event_date ? formatDate(form.event_date) : 'Pilih tanggal...' }}
+              </span>
+              <IconCalendar class="w-5 h-5 text-muted-foreground" />
             </div>
-          </div>
-        </div>
+            
+            <!-- Backdrop for closing -->
+            <div v-if="showDatePicker" class="fixed inset-0 z-40 bg-transparent" @click="showDatePicker = false"></div>
 
-        <div>
-          <label class="block text-sm font-medium mb-1">Jenis Layanan</label>
-          <select 
-            v-model="form.service_type" 
-            required
-            class="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all appearance-none"
-          >
-            <option value="" disabled>Pilih Jenis Layanan...</option>
-            <option value="Wedding">Wedding</option>
-            <option value="Graduation">Graduation</option>
-            <option value="Family Portrait">Family Portrait</option>
-            <option value="Corporate">Corporate</option>
-            <option value="Event">Event</option>
-          </select>
+            <!-- Custom Date Picker Popover (Origin-Aware via origin-top-left) -->
+            <Transition name="popover">
+              <div v-if="showDatePicker" class="absolute z-50 mt-2 left-0 right-0 sm:right-auto origin-top-left">
+                <div class="relative z-50">
+                  <UiDatePicker 
+                    v-model="parsedDate" 
+                    @select="handleDateSelect" 
+                    class="w-full sm:w-auto"
+                  />
+                </div>
+              </div>
+            </Transition>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Jenis Layanan</label>
+            <select 
+              v-model="form.service_type" 
+              required
+              class="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out appearance-none"
+            >
+              <option value="" disabled>Pilih Jenis Layanan...</option>
+              <option value="Wedding">Wedding</option>
+              <option value="Graduation">Graduation</option>
+              <option value="Family Portrait">Family Portrait</option>
+              <option value="Corporate">Corporate</option>
+              <option value="Event">Event</option>
+            </select>
+          </div>
         </div>
 
         <!-- Conditional Sesi for Wedding -->
-        <div v-if="form.service_type === 'Wedding'" class="space-y-2 p-4 bg-muted/50 rounded-xl border border-border">
-          <label class="block text-sm font-medium mb-2">Sub-Sesi (Pilih minimal satu)</label>
-          <div class="space-y-3">
-            <label class="flex items-center space-x-3 cursor-pointer">
-              <input type="checkbox" value="Akad" v-model="form.sessions" class="w-5 h-5 rounded border-border text-foreground focus:ring-foreground" />
-              <span class="text-sm">Akad / Pemberkatan</span>
-            </label>
-            <label class="flex items-center space-x-3 cursor-pointer">
-              <input type="checkbox" value="Resepsi" v-model="form.sessions" class="w-5 h-5 rounded border-border text-foreground focus:ring-foreground" />
-              <span class="text-sm">Resepsi</span>
-            </label>
-            <label class="flex items-center space-x-3 cursor-pointer">
-              <input type="checkbox" value="Ngunduh Mantu" v-model="form.sessions" class="w-5 h-5 rounded border-border text-foreground focus:ring-foreground" />
-              <span class="text-sm">Ngunduh Mantu</span>
-            </label>
+        <Transition name="popover">
+          <div v-if="form.service_type === 'Wedding'" class="space-y-2 p-4 bg-muted/50 rounded-xl border border-border origin-top">
+            <label class="block text-sm font-medium mb-2">Sub-Sesi (Pilih minimal satu)</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-background/60 transition-colors">
+                <input type="checkbox" value="Akad" v-model="form.sessions" class="w-4 h-4 rounded border-border text-foreground focus:ring-foreground" />
+                <span class="text-sm">Akad / Pemberkatan</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-background/60 transition-colors">
+                <input type="checkbox" value="Resepsi" v-model="form.sessions" class="w-4 h-4 rounded border-border text-foreground focus:ring-foreground" />
+                <span class="text-sm">Resepsi</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-background/60 transition-colors">
+                <input type="checkbox" value="Ngunduh Mantu" v-model="form.sessions" class="w-4 h-4 rounded border-border text-foreground focus:ring-foreground" />
+                <span class="text-sm">Ngunduh Mantu</span>
+              </label>
+            </div>
           </div>
-        </div>
+        </Transition>
 
-        <!-- Nomor WA Klien -->
-        <div>
-          <label class="block text-sm font-medium mb-1">Nomor WhatsApp Klien</label>
-          <div class="relative">
-            <IconPhone class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
-            <input 
-              v-model="form.client_phone" 
-              type="tel" 
-              inputmode="numeric"
-              placeholder="6281234567890"
-              class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
-            />
-          </div>
-          <p class="text-[11px] text-muted-foreground mt-1">Format internasional tanpa tanda +. Contoh: 6281234567890</p>
-        </div>
-
-        <!-- Lokasi Acara & Waktu -->
-        <div class="space-y-4">
+        <!-- Nomor WA Klien & Lokasi -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-1">Lokasi Acara</label>
+            <label class="block text-sm font-medium mb-1.5">Nomor WhatsApp Klien</label>
+            <div class="relative">
+              <IconPhone class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
+              <input 
+                v-model="form.client_phone" 
+                type="tel" 
+                inputmode="numeric"
+                placeholder="6281234567890"
+                class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out tabular-nums"
+              />
+            </div>
+            <p class="text-[11px] text-muted-foreground mt-1">Format internasional tanpa +. Contoh: 6281234567890</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1.5">Lokasi Acara</label>
             <div class="relative">
               <IconMapPin class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
               <input 
                 v-model="form.location" 
                 type="text" 
                 placeholder="Gedung Sasana Kriya, Surabaya"
-                class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
+                class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out"
               />
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Waktu Mulai & Selesai</label>
-            <div class="flex gap-4">
-              <div class="flex-1 relative">
-                <IconClock class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
-                <input 
-                  v-model="form.time_start" 
-                  type="time" 
-                  class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all appearance-none cursor-pointer text-foreground"
-                />
-              </div>
-              <div class="flex-1 relative">
-                <IconClock class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
-                <input 
-                  v-model="form.time_finish" 
-                  type="time" 
-                  class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-all appearance-none cursor-pointer text-foreground"
-                />
-              </div>
             </div>
           </div>
         </div>
 
-        <div v-if="error" class="p-3 text-sm text-red-500 bg-red-50 rounded-lg border border-red-200 dark:bg-red-950/30 dark:border-red-900">
-          {{ error }}
+        <!-- Waktu Mulai & Selesai -->
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Waktu Mulai & Selesai</label>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="relative">
+              <IconClock class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
+              <input 
+                v-model="form.time_start" 
+                type="time" 
+                class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out appearance-none cursor-pointer text-foreground tabular-nums"
+              />
+            </div>
+            <div class="relative">
+              <IconClock class="w-4 h-4 absolute left-4 top-3.5 text-muted-foreground" />
+              <input 
+                v-model="form.time_finish" 
+                type="time" 
+                class="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-background hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out appearance-none cursor-pointer text-foreground tabular-nums"
+              />
+            </div>
+          </div>
         </div>
+
+        <Transition name="popover">
+          <div v-if="error" class="p-3 text-sm text-red-500 bg-red-50 rounded-xl border border-red-200 dark:bg-red-950/30 dark:border-red-900">
+            {{ error }}
+          </div>
+        </Transition>
 
         <button 
           type="submit" 
           :disabled="loading || (form.service_type === 'Wedding' && form.sessions.length === 0)"
-          class="w-full py-3 px-4 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 transition-colors flex justify-center items-center mt-4 disabled:opacity-70 disabled:cursor-not-allowed"
+          class="w-full py-3.5 px-4 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 flex justify-center items-center mt-4 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          <span v-if="loading" class="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin mr-2"></span>
+          <span v-if="loading" class="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2"></span>
           {{ loading ? 'Menyimpan...' : 'Simpan & Buat Shotlist' }}
         </button>
       </form>
