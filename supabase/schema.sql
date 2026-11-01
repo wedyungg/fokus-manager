@@ -28,8 +28,11 @@ CREATE TABLE public.orders (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   user_id UUID REFERENCES auth.users(id),
   drive_link TEXT,
+  drive_folder_id TEXT,
   max_selections INTEGER,
   client_selection_link TEXT,
+  selected_photos JSONB DEFAULT '[]'::jsonb,
+  selection_locked BOOLEAN DEFAULT false,
   payment_status TEXT DEFAULT 'dp', -- 'dp', 'lunas'
   client_phone TEXT,
   location TEXT,

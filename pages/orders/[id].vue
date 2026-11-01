@@ -306,29 +306,43 @@
       </div>
 
       <div v-else-if="activeTab === 'drive'" class="space-y-6 max-w-2xl">
+        <!-- Form Generate / Update Link Seleksi Native -->
         <div class="bg-background border border-border p-5 md:p-6 rounded-2xl shadow-subtle space-y-4">
           <div class="flex justify-between items-center border-b border-border pb-4 mb-4">
-            <h3 class="font-serif text-lg font-semibold">Generate Link Klien</h3>
+            <div>
+              <h3 class="font-serif text-lg font-semibold">Pengaturan Seleksi Foto Klien</h3>
+              <p class="text-xs text-muted-foreground mt-0.5">Tautkan folder Google Drive untuk menghasilkan halaman seleksi foto di web ini.</p>
+            </div>
           </div>
           
-          <div v-if="order?.client_selection_link" class="mb-6 p-4 bg-muted/50 rounded-xl border border-border">
-             <p class="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Link Pemilihan Klien Aktif</p>
-             <div class="flex items-center gap-2">
-               <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-background border border-border text-xs px-3 py-2.5 rounded-xl text-muted-foreground outline-none cursor-text select-all font-mono" />
-               <button @click="copyLink(order.client_selection_link)" class="bg-foreground text-background hover:bg-foreground/90 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shadow-subtle">
-                 {{ copied ? 'Tersalin!' : 'Copy' }}
-               </button>
-             </div>
+          <div v-if="order?.client_selection_link" class="mb-6 p-4 bg-muted/50 rounded-xl border border-border space-y-2">
+            <div class="flex items-center justify-between">
+              <p class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Link Seleksi Klien Aktif</p>
+              <a
+                :href="order.client_selection_link"
+                target="_blank"
+                rel="noopener"
+                class="text-xs font-medium text-foreground underline hover:opacity-80"
+              >
+                Buka Halaman Klien
+              </a>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-background border border-border text-xs px-3 py-2.5 rounded-xl text-muted-foreground outline-none cursor-text select-all font-mono" />
+              <button @click="copyLink(order.client_selection_link)" class="bg-foreground text-background hover:bg-foreground/90 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shadow-subtle min-h-[40px]">
+                {{ copied ? 'Tersalin!' : 'Salin Link' }}
+              </button>
+            </div>
           </div>
 
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium mb-1">Link Google Drive Baru / Update</label>
+              <label class="block text-sm font-medium mb-1">Link Folder Google Drive</label>
               <input v-model="completionForm.driveLink" type="text" placeholder="https://drive.google.com/drive/folders/..." class="w-full px-4 py-3 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out" />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">Kuota Pilih Foto</label>
-              <input v-model.number="completionForm.maxSelections" type="number" placeholder="50" class="w-full px-4 py-3 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out tabular-nums" />
+              <label class="block text-sm font-medium mb-1">Kuota Maksimal Pilihan Foto</label>
+              <input v-model.number="completionForm.maxSelections" type="number" placeholder="20" class="w-full px-4 py-3 text-sm rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground transition-[border-color,box-shadow] duration-150 ease-emil-out tabular-nums" />
             </div>
           </div>
           
@@ -336,12 +350,107 @@
             <button 
               @click="submitCompletion" 
               :disabled="completingOrder || !completionForm.driveLink || !completionForm.maxSelections"
-              class="w-full py-3 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed"
+              class="w-full py-3 bg-foreground text-background rounded-xl font-medium hover:bg-foreground/90 flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed min-h-[44px]"
             >
               <span v-if="completingOrder" class="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin mr-2"></span>
-              {{ completingOrder ? 'Memproses...' : 'Generate / Update Link' }}
+              {{ completingOrder ? 'Memproses...' : 'Simpan & Buat Link Seleksi' }}
             </button>
           </div>
+        </div>
+
+        <!-- Panel Hasil Seleksi Foto Klien -->
+        <div class="bg-background border border-border p-5 md:p-6 rounded-2xl shadow-subtle space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-4">
+            <div>
+              <h3 class="font-serif text-lg font-semibold">Hasil Pilihan Foto Klien</h3>
+              <p class="text-xs text-muted-foreground mt-0.5 tabular-nums">
+                Terpilih: {{ selectedPhotosList.length }} / {{ order?.max_selections || 0 }} foto
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span
+                class="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider"
+                :class="order?.selection_locked ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground border border-border'"
+              >
+                {{ order?.selection_locked ? 'Terkunci (Selesai)' : 'Menunggu Klien' }}
+              </span>
+              <button
+                v-if="order?.selection_locked"
+                type="button"
+                @click="unlockClientSelection"
+                :disabled="unlockingSelection"
+                class="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-muted"
+              >
+                {{ unlockingSelection ? 'Membuka...' : 'Buka Kunci' }}
+              </button>
+            </div>
+          </div>
+
+          <div v-if="selectedPhotosList.length === 0" class="py-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
+            Klien belum mengirimkan daftar foto pilihan pada proyek ini.
+          </div>
+
+          <template v-else>
+            <!-- Action Buttons: Copy List, Copy Lightroom, & Fast ZIP Download -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <button
+                type="button"
+                @click="copyFilenames('newline')"
+                class="py-2.5 px-3 rounded-xl border border-border bg-background hover:bg-muted text-xs font-semibold flex items-center justify-center gap-1.5 min-h-[44px]"
+              >
+                <IconCopy class="w-4 h-4" />
+                <span>{{ copiedMode === 'newline' ? 'Daftar Tersalin!' : 'Salin Daftar Baris' }}</span>
+              </button>
+
+              <button
+                type="button"
+                @click="copyFilenames('lightroom')"
+                class="py-2.5 px-3 rounded-xl border border-border bg-background hover:bg-muted text-xs font-semibold flex items-center justify-center gap-1.5 min-h-[44px]"
+              >
+                <IconCopy class="w-4 h-4" />
+                <span>{{ copiedMode === 'lightroom' ? 'Format LR Tersalin!' : 'Salin Filter Lightroom' }}</span>
+              </button>
+
+              <button
+                type="button"
+                @click="downloadSelectedForEditing"
+                :disabled="zipProgress.active"
+                class="py-2.5 px-3 rounded-xl bg-foreground text-background hover:bg-foreground/90 text-xs font-bold flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
+              >
+                <IconDownload class="w-4 h-4" />
+                <span>{{ zipProgress.active ? `Mengemas (${zipPercent}%)` : `Unduh ZIP (${selectedPhotosList.length})` }}</span>
+              </button>
+            </div>
+
+            <!-- Determinate Progress Bar for Admin ZIP Download -->
+            <div v-if="zipProgress.active" class="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
+              <div class="flex justify-between items-center text-xs font-mono">
+                <span class="truncate max-w-[220px]">Mengunduh: {{ zipProgress.currentFile }}</span>
+                <span class="font-bold tabular-nums">{{ zipProgress.completed }} / {{ zipProgress.total }} ({{ zipPercent }}%)</span>
+              </div>
+              <div class="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                <div class="bg-foreground h-1.5 rounded-full transition-[width] duration-200" :style="{ width: `${zipPercent}%` }"></div>
+              </div>
+              <div class="flex justify-end pt-1">
+                <button type="button" @click="cancelAdminZip" class="text-[11px] font-medium text-muted-foreground hover:text-foreground underline">
+                  Batalkan Unduhan
+                </button>
+              </div>
+            </div>
+
+            <!-- Selected Filenames Chip / List View -->
+            <div class="bg-muted/40 border border-border rounded-xl p-3.5 max-h-64 overflow-y-auto">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div
+                  v-for="(item, idx) in selectedPhotosList"
+                  :key="item.id || idx"
+                  class="px-2.5 py-1.5 bg-background border border-border rounded-lg text-xs font-mono flex items-center justify-between gap-2"
+                >
+                  <span class="truncate"><span class="text-muted-foreground mr-1.5">{{ idx + 1 }}.</span>{{ item.name }}</span>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
       
@@ -378,8 +487,11 @@ import {
   Trash2 as IconTrash2,
   Link as IconLink,
   MapPin as IconMapPin,
-  Phone as IconPhone
+  Phone as IconPhone,
+  Copy as IconCopy,
+  Download as IconDownload
 } from 'lucide-vue-next'
+import { downloadPhotosAsZip } from '~/utils/zipStore'
 
 const route = useRoute()
 const supabase = useSupabaseClient()
@@ -400,6 +512,25 @@ const completionForm = ref({
   maxSelections: null
 })
 const copied = ref(false)
+const copiedMode = ref('')
+const unlockingSelection = ref(false)
+const zipProgress = ref({
+  active: false,
+  completed: 0,
+  total: 0,
+  currentFile: ''
+})
+let adminZipAbort = null
+
+const selectedPhotosList = computed(() => {
+  if (!order.value || !Array.isArray(order.value.selected_photos)) return []
+  return order.value.selected_photos
+})
+
+const zipPercent = computed(() => {
+  if (!zipProgress.value.total) return 0
+  return Math.round((zipProgress.value.completed / zipProgress.value.total) * 100)
+})
 
 const fetchOrderDetails = async () => {
   try {
@@ -413,9 +544,10 @@ const fetchOrderDetails = async () => {
       .single()
       
     if (orderError) throw orderError
-    // Handle fallback for existing orders without payment_status
     if (!orderData.payment_status) orderData.payment_status = 'dp'
     order.value = orderData
+    completionForm.value.driveLink = orderData.drive_link || ''
+    completionForm.value.maxSelections = orderData.max_selections || 20
 
     // Fetch Tasks
     const { data: tasksData, error: tasksError } = await supabase
@@ -593,38 +725,122 @@ const copyLink = async (text) => {
 const submitCompletion = async () => {
   completingOrder.value = true
   try {
-    // Extract Folder ID using Regex logic provided by user
-    const link = completionForm.value.driveLink
-    const match = link.match(/folders\/([^/?]+)/)
+    const link = completionForm.value.driveLink.trim()
+    const match = link.match(/folders\/([^/?#&]+)/)
     const folderId = match ? match[1] : link
     
-    const gasBaseUrl = 'https://script.google.com/macros/s/AKfycby76mKVOXxMrEBfqFjZF_bE1haxMB62JM52nnncW5n5iyFg6AZ6FIxUyHJZOyg5L2TX/exec'
-    const finalGasLink = `${gasBaseUrl}?id=${folderId}&limit=${completionForm.value.maxSelections}`
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const nativeSelectionLink = `${origin}/select/${orderId}`
     
+    const payload = { 
+      drive_link: link,
+      drive_folder_id: folderId,
+      max_selections: completionForm.value.maxSelections,
+      client_selection_link: nativeSelectionLink
+    }
+
     const { error } = await supabase
       .from('orders')
-      .update({ 
-        drive_link: link,
-        max_selections: completionForm.value.maxSelections,
-        client_selection_link: finalGasLink
-      })
+      .update(payload)
       .eq('id', orderId)
       
-    if (error) throw error
-    
-    // Update local state
-    if (order.value) {
-      order.value.drive_link = link
-      order.value.max_selections = completionForm.value.maxSelections
-      order.value.client_selection_link = finalGasLink
+    if (error) {
+      // Fallback if drive_folder_id column hasn't been migrated yet
+      const { error: fallbackErr } = await supabase
+        .from('orders')
+        .update({
+          drive_link: link,
+          max_selections: completionForm.value.maxSelections,
+          client_selection_link: nativeSelectionLink
+        })
+        .eq('id', orderId)
+      if (fallbackErr) throw fallbackErr
     }
     
-    alert('Link berhasil digenerate dan disimpan!')
+    if (order.value) {
+      order.value.drive_link = link
+      order.value.drive_folder_id = folderId
+      order.value.max_selections = completionForm.value.maxSelections
+      order.value.client_selection_link = nativeSelectionLink
+    }
+    
+    alert('Link seleksi berhasil dibuat dan disimpan!')
   } catch (e) {
-    alert('Gagal generate link: ' + e.message)
+    alert('Gagal membuat link: ' + e.message)
     console.error(e)
   } finally {
     completingOrder.value = false
+  }
+}
+
+const copyFilenames = async (mode) => {
+  if (selectedPhotosList.value.length === 0) return
+  const names = selectedPhotosList.value.map((p) => p.name)
+  const text = mode === 'lightroom' ? names.join(', ') : names.join('\n')
+  try {
+    await navigator.clipboard.writeText(text)
+    copiedMode.value = mode
+    setTimeout(() => {
+      copiedMode.value = ''
+    }, 2000)
+  } catch (err) {
+    console.error('Failed to copy filenames:', err)
+  }
+}
+
+const downloadSelectedForEditing = async () => {
+  if (selectedPhotosList.value.length === 0 || zipProgress.value.active) return
+  adminZipAbort = new AbortController()
+  const safeClient = (order.value?.client_name || 'Order').replace(/[^a-zA-Z0-9_-]/g, '_')
+
+  zipProgress.value = {
+    active: true,
+    completed: 0,
+    total: selectedPhotosList.value.length,
+    currentFile: 'Memulai unduhan paralel...'
+  }
+
+  try {
+    await downloadPhotosAsZip(
+      selectedPhotosList.value,
+      `${safeClient}_Edit_${selectedPhotosList.value.length}_Foto.zip`,
+      (completed, total, currentFileName) => {
+        zipProgress.value.completed = completed
+        zipProgress.value.total = total
+        zipProgress.value.currentFile = currentFileName
+      },
+      adminZipAbort.signal,
+      4
+    )
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      alert('Gagal mengunduh ZIP: ' + err.message)
+    }
+  } finally {
+    zipProgress.value.active = false
+    adminZipAbort = null
+  }
+}
+
+const cancelAdminZip = () => {
+  if (adminZipAbort) adminZipAbort.abort()
+}
+
+const unlockClientSelection = async () => {
+  if (!confirm('Buka kunci seleksi agar klien dapat mengubah pilihan fotonya?')) return
+  unlockingSelection.value = true
+  try {
+    const res = await $fetch(`/api/selection/${orderId}`, {
+      method: 'POST',
+      body: { action: 'unlock' }
+    })
+    if (res?.success && order.value) {
+      order.value.selection_locked = false
+    }
+  } catch (err) {
+    alert('Gagal membuka kunci: ' + (err?.data?.statusMessage || err.message))
+  } finally {
+    unlockingSelection.value = false
   }
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div 
     class="min-h-screen bg-background text-foreground flex flex-col font-sans w-full max-w-md md:max-w-3xl lg:max-w-6xl mx-auto shadow-2xl md:shadow-none relative border-x md:border-x-0 border-border transition-colors duration-200"
-    :class="{ 'pb-20 md:pb-8': $route.path !== '/login' }"
+    :class="{ 'pb-20 md:pb-8': !isPublicRoute }"
   >
     <header class="sticky top-0 z-20 bg-background/85 backdrop-blur-md border-b border-border/80 px-4 md:px-8 flex items-center justify-between shadow-subtle h-16">
       <!-- Left: Back button + Brand -->
@@ -15,7 +15,7 @@
           <IconArrowLeft class="w-5 h-5" />
         </button>
         
-        <NuxtLink to="/orders" class="flex items-center gap-2.5 group">
+        <NuxtLink :to="isPublicRoute ? $route.fullPath : '/orders'" class="flex items-center gap-2.5 group">
           <img
             src="/FK WEB ICON.png"
             alt="Fokus Manager Logo"
@@ -26,7 +26,7 @@
       </div>
       
       <!-- Center: Desktop / Tablet Navigation -->
-      <nav v-if="$route.path !== '/login'" class="hidden md:flex items-center gap-1 bg-muted/70 p-1 rounded-2xl border border-border/60">
+      <nav v-if="!isPublicRoute" class="hidden md:flex items-center gap-1 bg-muted/70 p-1 rounded-2xl border border-border/60">
         <NuxtLink 
           v-for="item in navItems" 
           :key="item.path" 
@@ -59,7 +59,7 @@
     </main>
 
     <!-- Bottom Navigation for Mobile Only -->
-    <nav v-if="$route.path !== '/login'" class="md:hidden fixed bottom-0 left-0 right-0 z-20 bg-background/90 backdrop-blur-lg border-t border-border/80 shadow-[0_-4px_15px_rgba(0,0,0,0.04)] max-w-md mx-auto">
+    <nav v-if="!isPublicRoute" class="md:hidden fixed bottom-0 left-0 right-0 z-20 bg-background/90 backdrop-blur-lg border-t border-border/80 shadow-[0_-4px_15px_rgba(0,0,0,0.04)] max-w-md mx-auto">
       <ul class="flex justify-around items-center h-16 px-2">
         <li v-for="item in navItems" :key="item.path" class="flex-1">
           <NuxtLink 
@@ -98,7 +98,8 @@ const toggleColorMode = () => {
 }
 
 const mainRoutes = ['/', '/orders', '/profile', '/login', '/references', '/reports']
-const showBackButton = computed(() => !mainRoutes.includes(route.path))
+const isPublicRoute = computed(() => route.path === '/login' || route.path.startsWith('/select/'))
+const showBackButton = computed(() => !mainRoutes.includes(route.path) && !route.path.startsWith('/select/'))
 
 const isActiveRoute = (path) => {
   if (path === '/') return route.path === '/'
