@@ -18,14 +18,22 @@
       </div>
     </div>
     
-    <!-- Link Selection Box for Client (Visible when done) -->
-    <div v-if="order?.status === 'done' && order?.client_selection_link" class="bg-muted/50 border border-border rounded-2xl p-4 mb-4 shadow-subtle max-w-2xl">
-      <h3 class="text-xs font-bold text-foreground uppercase tracking-wider mb-2.5 flex items-center">
-        <IconLink class="w-3.5 h-3.5 mr-1.5 text-muted-foreground" /> Link Pemilihan Foto Klien
-      </h3>
+    <div v-if="order?.status === 'done' && nativeSelectionUrl" class="bg-muted/50 border border-border rounded-2xl p-4 mb-4 shadow-subtle max-w-2xl">
+      <div class="flex items-center justify-between mb-2.5">
+        <h3 class="text-xs font-bold text-foreground uppercase tracking-wider flex items-center">
+          <IconLink class="w-3.5 h-3.5 mr-1.5 text-muted-foreground" /> Link Pemilihan Foto Klien
+        </h3>
+        <NuxtLink
+          :to="`/select/${orderId}`"
+          target="_blank"
+          class="text-xs font-medium text-foreground underline hover:opacity-80"
+        >
+          Buka Halaman Klien
+        </NuxtLink>
+      </div>
       <div class="flex items-center gap-2">
-        <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-background border border-border text-xs px-3 py-2.5 rounded-xl text-muted-foreground outline-none cursor-text select-all font-mono" />
-        <button @click="copyLink(order.client_selection_link)" class="bg-foreground text-background hover:bg-foreground/90 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shadow-subtle">
+        <input type="text" readonly :value="nativeSelectionUrl" class="flex-1 bg-background border border-border text-xs px-3 py-2.5 rounded-xl text-muted-foreground outline-none cursor-text select-all font-mono" />
+        <button @click="copyLink(nativeSelectionUrl)" class="bg-foreground text-background hover:bg-foreground/90 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shadow-subtle">
           {{ copied ? 'Tersalin!' : 'Copy' }}
         </button>
       </div>
@@ -315,21 +323,20 @@
             </div>
           </div>
           
-          <div v-if="order?.client_selection_link" class="mb-6 p-4 bg-muted/50 rounded-xl border border-border space-y-2">
+          <div v-if="nativeSelectionUrl" class="mb-6 p-4 bg-muted/50 rounded-xl border border-border space-y-2">
             <div class="flex items-center justify-between">
               <p class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Link Seleksi Klien Aktif</p>
-              <a
-                :href="order.client_selection_link"
+              <NuxtLink
+                :to="`/select/${orderId}`"
                 target="_blank"
-                rel="noopener"
                 class="text-xs font-medium text-foreground underline hover:opacity-80"
               >
                 Buka Halaman Klien
-              </a>
+              </NuxtLink>
             </div>
             <div class="flex items-center gap-2">
-              <input type="text" readonly :value="order.client_selection_link" class="flex-1 bg-background border border-border text-xs px-3 py-2.5 rounded-xl text-muted-foreground outline-none cursor-text select-all font-mono" />
-              <button @click="copyLink(order.client_selection_link)" class="bg-foreground text-background hover:bg-foreground/90 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shadow-subtle min-h-[40px]">
+              <input type="text" readonly :value="nativeSelectionUrl" class="flex-1 bg-background border border-border text-xs px-3 py-2.5 rounded-xl text-muted-foreground outline-none cursor-text select-all font-mono" />
+              <button @click="copyLink(nativeSelectionUrl)" class="bg-foreground text-background hover:bg-foreground/90 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shadow-subtle min-h-[40px]">
                 {{ copied ? 'Tersalin!' : 'Salin Link' }}
               </button>
             </div>
@@ -370,12 +377,12 @@
             <div class="flex items-center gap-2">
               <span
                 class="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider"
-                :class="order?.selection_locked ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground border border-border'"
+                :class="isSelectionLocked ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground border border-border'"
               >
-                {{ order?.selection_locked ? 'Terkunci (Selesai)' : 'Menunggu Klien' }}
+                {{ isSelectionLocked ? 'Terkunci (Selesai)' : 'Menunggu Klien' }}
               </span>
               <button
-                v-if="order?.selection_locked"
+                v-if="isSelectionLocked"
                 type="button"
                 @click="unlockClientSelection"
                 :disabled="unlockingSelection"
@@ -522,9 +529,29 @@ const zipProgress = ref({
 })
 let adminZipAbort = null
 
+const fallbackSelectedPhotos = ref([])
+const fallbackSelectionLocked = ref(false)
+
+const nativeSelectionUrl = computed(() => {
+  if (!order.value) return ''
+  const hasDrive =
+    order.value.drive_link ||
+    order.value.drive_folder_id ||
+    order.value.client_selection_link
+  if (!hasDrive) return ''
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  return `${origin}/select/${orderId}`
+})
+
 const selectedPhotosList = computed(() => {
-  if (!order.value || !Array.isArray(order.value.selected_photos)) return []
-  return order.value.selected_photos
+  if (order.value && Array.isArray(order.value.selected_photos) && order.value.selected_photos.length > 0) {
+    return order.value.selected_photos
+  }
+  return fallbackSelectedPhotos.value
+})
+
+const isSelectionLocked = computed(() => {
+  return Boolean(order.value?.selection_locked) || fallbackSelectionLocked.value
 })
 
 const zipPercent = computed(() => {
@@ -536,7 +563,6 @@ const fetchOrderDetails = async () => {
   try {
     loading.value = true
     
-    // Fetch Order
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .select('*')
@@ -545,11 +571,35 @@ const fetchOrderDetails = async () => {
       
     if (orderError) throw orderError
     if (!orderData.payment_status) orderData.payment_status = 'dp'
+
+    // Extract folder ID from legacy GAS link if drive_link was empty
+    if (!orderData.drive_link && orderData.client_selection_link) {
+      const legacyIdMatch = orderData.client_selection_link.match(/[?&]id=([^&#]+)/)
+      if (legacyIdMatch && legacyIdMatch[1]) {
+        orderData.drive_link = `https://drive.google.com/drive/folders/${legacyIdMatch[1]}`
+      }
+    }
+
+    // Automatically replace legacy script.google.com link with native /select/[id] URL
+    if (typeof window !== 'undefined' && (orderData.drive_link || orderData.client_selection_link)) {
+      const expectedNativeLink = `${window.location.origin}/select/${orderId}`
+      if (orderData.client_selection_link && orderData.client_selection_link.includes('script.google.com')) {
+        orderData.client_selection_link = expectedNativeLink
+        supabase
+          .from('orders')
+          .update({
+            drive_link: orderData.drive_link,
+            client_selection_link: expectedNativeLink
+          })
+          .eq('id', orderId)
+          .then(() => {})
+      }
+    }
+
     order.value = orderData
     completionForm.value.driveLink = orderData.drive_link || ''
     completionForm.value.maxSelections = orderData.max_selections || 20
 
-    // Fetch Tasks
     const { data: tasksData, error: tasksError } = await supabase
       .from('order_tasks')
       .select('*')
@@ -557,7 +607,18 @@ const fetchOrderDetails = async () => {
       .order('created_at', { ascending: true })
       
     if (tasksError) throw tasksError
-    tasks.value = tasksData || []
+    const allTasks = tasksData || []
+    const selectionRecord = allTasks.find(t => t.category === '__SELECTION__')
+    if (selectionRecord) {
+      fallbackSelectionLocked.value = Boolean(selectionRecord.is_completed)
+      if (selectionRecord.technical_note) {
+        try {
+          const parsed = JSON.parse(selectionRecord.technical_note)
+          if (Array.isArray(parsed)) fallbackSelectedPhotos.value = parsed
+        } catch {}
+      }
+    }
+    tasks.value = allTasks.filter(t => t.category !== '__SELECTION__')
 
     // Fetch Finances
     const { data: financeDataResult, error: financeError } = await supabase
@@ -726,40 +787,22 @@ const submitCompletion = async () => {
   completingOrder.value = true
   try {
     const link = completionForm.value.driveLink.trim()
-    const match = link.match(/folders\/([^/?#&]+)/)
-    const folderId = match ? match[1] : link
-    
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
     const nativeSelectionLink = `${origin}/select/${orderId}`
     
-    const payload = { 
-      drive_link: link,
-      drive_folder_id: folderId,
-      max_selections: completionForm.value.maxSelections,
-      client_selection_link: nativeSelectionLink
-    }
-
     const { error } = await supabase
       .from('orders')
-      .update(payload)
+      .update({
+        drive_link: link,
+        max_selections: completionForm.value.maxSelections,
+        client_selection_link: nativeSelectionLink
+      })
       .eq('id', orderId)
       
-    if (error) {
-      // Fallback if drive_folder_id column hasn't been migrated yet
-      const { error: fallbackErr } = await supabase
-        .from('orders')
-        .update({
-          drive_link: link,
-          max_selections: completionForm.value.maxSelections,
-          client_selection_link: nativeSelectionLink
-        })
-        .eq('id', orderId)
-      if (fallbackErr) throw fallbackErr
-    }
+    if (error) throw error
     
     if (order.value) {
       order.value.drive_link = link
-      order.value.drive_folder_id = folderId
       order.value.max_selections = completionForm.value.maxSelections
       order.value.client_selection_link = nativeSelectionLink
     }
@@ -834,8 +877,9 @@ const unlockClientSelection = async () => {
       method: 'POST',
       body: { action: 'unlock' }
     })
-    if (res?.success && order.value) {
-      order.value.selection_locked = false
+    if (res?.success) {
+      if (order.value) order.value.selection_locked = false
+      fallbackSelectionLocked.value = false
     }
   } catch (err) {
     alert('Gagal membuka kunci: ' + (err?.data?.statusMessage || err.message))

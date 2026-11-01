@@ -8,13 +8,19 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  const supabaseUrl = process.env.SUPABASE_URL!
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY!
+  const config = useRuntimeConfig()
+  const supabaseUrl = (config.supabaseUrl as string) || process.env.SUPABASE_URL!
+  const supabaseKey =
+    (config.supabaseServiceKey as string) ||
+    process.env.SUPABASE_SERVICE_KEY ||
+    (config.supabaseKey as string) ||
+    process.env.SUPABASE_KEY!
+
   const supabase = createClient(supabaseUrl, supabaseKey)
 
   const { data: order, error: fetchError } = await supabase
     .from('orders')
-    .select('id, client_name, service_type, max_selections, selection_locked')
+    .select('*')
     .eq('id', orderId)
     .single()
 
@@ -22,20 +28,32 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Data proyek tidak ditemukan.' })
   }
 
-  // Admin action: unlock client selection so client can revise choices.
+  const { data: existingSelectionTask } = await supabase
+    .from('order_tasks')
+    .select('id, technical_note, is_completed')
+    .eq('order_id', orderId)
+    .eq('category', '__SELECTION__')
+    .maybeSingle()
+
+  const isCurrentlyLocked = Boolean(order.selection_locked) || Boolean(existingSelectionTask?.is_completed)
+
   if (body?.action === 'unlock') {
-    const { error: unlockError } = await supabase
+    await supabase
       .from('orders')
       .update({ selection_locked: false })
       .eq('id', orderId)
 
-    if (unlockError) {
-      throw createError({ statusCode: 500, statusMessage: unlockError.message })
+    if (existingSelectionTask?.id) {
+      await supabase
+        .from('order_tasks')
+        .update({ is_completed: false })
+        .eq('id', existingSelectionTask.id)
     }
+
     return { success: true, selection_locked: false }
   }
 
-  if (order.selection_locked) {
+  if (isCurrentlyLocked) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Pilihan foto sudah dikunci. Hubungi tim fokuskesini jika ingin mengubah pilihan.'
@@ -52,12 +70,14 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const sanitizedPhotos = selectedPhotos.map((item: any) => ({
-    id: String(item.id || ''),
-    name: String(item.name || '')
-  })).filter((item: { id: string; name: string }) => item.id && item.name)
+  const sanitizedPhotos = selectedPhotos
+    .map((item: any) => ({
+      id: String(item.id || ''),
+      name: String(item.name || '')
+    }))
+    .filter((item: { id: string; name: string }) => item.id && item.name)
 
-  const { error: updateError } = await supabase
+  await supabase
     .from('orders')
     .update({
       selected_photos: sanitizedPhotos,
@@ -65,13 +85,32 @@ export default defineEventHandler(async (event) => {
     })
     .eq('id', orderId)
 
-  if (updateError) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: updateError.message.includes('selected_photos')
-        ? 'Kolom selected_photos belum ada di tabel orders Supabase. Jalankan SQL migrasi terlebih dahulu.'
-        : updateError.message
-    })
+  if (existingSelectionTask?.id) {
+    const { error: taskUpdateErr } = await supabase
+      .from('order_tasks')
+      .update({
+        technical_note: JSON.stringify(sanitizedPhotos),
+        is_completed: true
+      })
+      .eq('id', existingSelectionTask.id)
+
+    if (taskUpdateErr) {
+      throw createError({ statusCode: 500, statusMessage: taskUpdateErr.message })
+    }
+  } else {
+    const { error: taskInsertErr } = await supabase
+      .from('order_tasks')
+      .insert({
+        order_id: orderId,
+        task_name: '__CLIENT_SELECTION__',
+        category: '__SELECTION__',
+        technical_note: JSON.stringify(sanitizedPhotos),
+        is_completed: true
+      })
+
+    if (taskInsertErr) {
+      throw createError({ statusCode: 500, statusMessage: taskInsertErr.message })
+    }
   }
 
   return {

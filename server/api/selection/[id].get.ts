@@ -18,9 +18,14 @@ export default defineEventHandler(async (event) => {
   }
 
   const config = useRuntimeConfig()
-  const apiKey = config.googleDriveApiKey
-  const supabaseUrl = process.env.SUPABASE_URL!
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY!
+  const apiKey = config.googleDriveApiKey || process.env.GOOGLE_DRIVE_API_KEY
+  const supabaseUrl = (config.supabaseUrl as string) || process.env.SUPABASE_URL!
+  const supabaseKey =
+    (config.supabaseServiceKey as string) ||
+    process.env.SUPABASE_SERVICE_KEY ||
+    (config.supabaseKey as string) ||
+    process.env.SUPABASE_KEY!
+
   const supabase = createClient(supabaseUrl, supabaseKey)
 
   const { data: order, error: orderError } = await supabase
@@ -33,18 +38,48 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Data proyek tidak ditemukan.' })
   }
 
-  const folderId = order.drive_folder_id || extractFolderId(order.drive_link) || extractFolderId(order.client_selection_link)
+  let selectedPhotos: Array<{ id: string; name: string }> = Array.isArray(order.selected_photos)
+    ? order.selected_photos
+    : []
+  let selectionLocked = Boolean(order.selection_locked)
+
+  const { data: selectionTask } = await supabase
+    .from('order_tasks')
+    .select('technical_note, is_completed')
+    .eq('order_id', orderId)
+    .eq('category', '__SELECTION__')
+    .maybeSingle()
+
+  if (selectionTask) {
+    if (selectedPhotos.length === 0 && selectionTask.technical_note) {
+      try {
+        const parsed = JSON.parse(selectionTask.technical_note)
+        if (Array.isArray(parsed)) selectedPhotos = parsed
+      } catch {}
+    }
+    if (!('selection_locked' in order) || !order.selection_locked) {
+      selectionLocked = Boolean(selectionTask.is_completed)
+    }
+  }
+
+  const folderId =
+    order.drive_folder_id ||
+    extractFolderId(order.drive_link) ||
+    extractFolderId(order.client_selection_link)
+
+  const orderPayload = {
+    id: order.id,
+    client_name: order.client_name,
+    service_type: order.service_type,
+    event_date: order.event_date,
+    max_selections: Number(order.max_selections) || 20,
+    selected_photos: selectedPhotos,
+    selection_locked: selectionLocked
+  }
+
   if (!folderId) {
     return {
-      order: {
-        id: order.id,
-        client_name: order.client_name,
-        service_type: order.service_type,
-        event_date: order.event_date,
-        max_selections: order.max_selections || 20,
-        selected_photos: Array.isArray(order.selected_photos) ? order.selected_photos : [],
-        selection_locked: Boolean(order.selection_locked)
-      },
+      order: orderPayload,
       photos: [],
       error: 'Folder Google Drive belum ditautkan pada proyek ini.'
     }
@@ -65,8 +100,7 @@ export default defineEventHandler(async (event) => {
         q,
         key: apiKey,
         fields: 'nextPageToken, files(id, name, thumbnailLink)',
-        pageSize: '1000',
-        orderBy: 'name_natural'
+        pageSize: '1000'
       })
       if (pageToken) params.set('pageToken', pageToken)
 
@@ -80,11 +114,12 @@ export default defineEventHandler(async (event) => {
       if (Array.isArray(data.files)) {
         for (const file of data.files) {
           const baseThumb = file.thumbnailLink || `https://lh3.googleusercontent.com/d/${file.id}=s220`
+          const highResThumb = baseThumb.replace(/=s\d+$/, '=s1000')
           photos.push({
             id: file.id,
             name: file.name,
-            url: baseThumb.replace(/=s\d+$/, '=s600'),
-            previewUrl: baseThumb.replace(/=s\d+$/, '=s1600')
+            url: highResThumb,
+            previewUrl: highResThumb
           })
         }
       }
@@ -92,29 +127,15 @@ export default defineEventHandler(async (event) => {
       pageToken = data.nextPageToken || null
     } while (pageToken)
 
+    photos.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
+
     return {
-      order: {
-        id: order.id,
-        client_name: order.client_name,
-        service_type: order.service_type,
-        event_date: order.event_date,
-        max_selections: order.max_selections || 20,
-        selected_photos: Array.isArray(order.selected_photos) ? order.selected_photos : [],
-        selection_locked: Boolean(order.selection_locked)
-      },
+      order: orderPayload,
       photos
     }
   } catch (err: any) {
     return {
-      order: {
-        id: order.id,
-        client_name: order.client_name,
-        service_type: order.service_type,
-        event_date: order.event_date,
-        max_selections: order.max_selections || 20,
-        selected_photos: Array.isArray(order.selected_photos) ? order.selected_photos : [],
-        selection_locked: Boolean(order.selection_locked)
-      },
+      order: orderPayload,
       photos: [],
       error: err.message || 'Gagal memuat daftar foto dari Google Drive.'
     }

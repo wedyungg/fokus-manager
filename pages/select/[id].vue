@@ -109,7 +109,7 @@
         </button>
       </div>
 
-      <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
+      <div v-else class="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
         <div
           v-for="(photo, idx) in displayedPhotos"
           :key="photo.id"
@@ -123,7 +123,7 @@
             referrerpolicy="no-referrer"
             @click="handleCardClick(photo, idx)"
             class="w-full h-full object-cover cursor-pointer transition-all duration-200"
-            :class="isSelected(photo.id) ? 'scale-[0.97] rounded-lg opacity-85' : 'group-hover:scale-[1.02]'"
+            :class="isSelected(photo.id) ? 'scale-[0.97] rounded-lg opacity-75' : 'group-hover:scale-[1.02]'"
           />
 
           <button
@@ -134,7 +134,7 @@
             class="absolute top-0 right-0 w-11 h-11 flex items-center justify-center z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground rounded-bl-xl disabled:cursor-default"
           >
             <span
-              class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150 shadow-sm"
+              class="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-bold transition-all duration-150 shadow-sm"
               :class="
                 isSelected(photo.id)
                   ? 'bg-foreground text-background border-2 border-foreground scale-105'
@@ -145,8 +145,8 @@
             </span>
           </button>
 
-          <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent pt-6 pb-1.5 pl-2.5 pr-11 pointer-events-none">
-            <p class="text-[11px] font-mono text-white truncate">{{ photo.name }}</p>
+          <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent pt-5 pb-1.5 pl-2 pr-9 pointer-events-none">
+            <p class="text-[10px] sm:text-[11px] font-mono text-white truncate">{{ photo.name }}</p>
           </div>
 
           <button
@@ -155,7 +155,7 @@
             :aria-label="`Pratinjau ukuran penuh ${photo.name}`"
             class="absolute bottom-0 right-0 w-11 h-11 flex items-center justify-center z-10 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-tl-xl"
           >
-            <span class="w-7 h-7 rounded-lg bg-black/55 hover:bg-black/80 flex items-center justify-center transition-colors">
+            <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black/55 backdrop-blur-sm hover:bg-black/80 flex items-center justify-center transition-colors">
               <IconMaximize2 class="w-3.5 h-3.5" />
             </span>
           </button>
@@ -629,7 +629,12 @@ const submitSelection = async () => {
     if (res?.success) {
       isLocked.value = true
       filterMode.value = 'selected'
-      showToast('Pilihan foto berhasil disimpan ke proyek fokuskesini!')
+      try {
+        const codes = selectedPhotos.value.map((p) => p.name)
+        const text = `Halo fokuskesini, ini ${selectedPhotos.value.length} foto pilihanku:\n\n` + codes.join('\n')
+        await navigator.clipboard.writeText(text)
+      } catch {}
+      showToast('Pilihan foto berhasil disimpan & disalin!')
     }
   } catch (err) {
     showToast(err?.data?.statusMessage || err?.message || 'Gagal menyimpan pilihan foto.')

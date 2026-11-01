@@ -42,11 +42,14 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    googleDriveApiKey: process.env.GOOGLE_DRIVE_API_KEY,
+    googleDriveApiKey: process.env.GOOGLE_DRIVE_API_KEY || 'AIzaSyCGdETH6LFijBh57uHyPR8CB1hyssaFnN8',
+    supabaseUrl: process.env.SUPABASE_URL || 'https://suoslnjdhfajdmpfxvdx.supabase.co',
+    supabaseKey: process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1b3NsbmpkaGZhamRtcGZ4dmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjU1OTgsImV4cCI6MjA5MzcwMTU5OH0.NpoRUNUVh9pLEBwpB1HwEdM89pMJDZCuKo8JrtNHZR0',
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1b3NsbmpkaGZhamRtcGZ4dmR4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODEyNTU5OCwiZXhwIjoyMDkzNzAxNTk4fQ.Uwbu-tzq6bfMDUZp0r-tst2SoNGoJvnS1Bcdip44s-8',
     fonnteApiKey: process.env.FONNTE_API_KEY,
     waGroupId: process.env.WA_GROUP_ID,
     public: {
-      googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID
+      googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID || '1pTLfiRAefhILv3HwpORe7P3_iestWOlY'
     }
   }
 })
