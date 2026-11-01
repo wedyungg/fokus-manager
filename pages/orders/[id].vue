@@ -374,7 +374,7 @@
                 Terpilih: {{ selectedPhotosList.length }} / {{ order?.max_selections || 0 }} foto
               </p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <span
                 class="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider"
                 :class="isSelectionLocked ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground border border-border'"
@@ -382,19 +382,59 @@
                 {{ isSelectionLocked ? 'Terkunci (Selesai)' : 'Menunggu Klien' }}
               </span>
               <button
+                type="button"
+                @click="showImportBox = !showImportBox"
+                class="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-muted min-h-[34px]"
+              >
+                {{ showImportBox ? 'Tutup Impor WA' : 'Impor dari Chat WA' }}
+              </button>
+              <button
                 v-if="isSelectionLocked"
                 type="button"
                 @click="unlockClientSelection"
                 :disabled="unlockingSelection"
-                class="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-muted"
+                class="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-muted min-h-[34px]"
               >
                 {{ unlockingSelection ? 'Membuka...' : 'Buka Kunci' }}
               </button>
             </div>
           </div>
 
-          <div v-if="selectedPhotosList.length === 0" class="py-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
-            Klien belum mengirimkan daftar foto pilihan pada proyek ini.
+          <div v-if="showImportBox" class="p-4 rounded-xl bg-muted/50 border border-border space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold uppercase tracking-wider text-foreground">
+                Tempel Chat Daftar Foto dari WhatsApp / GAS Lama
+              </label>
+            </div>
+            <textarea
+              v-model="importRawText"
+              rows="5"
+              placeholder="Contoh:&#10;Halo fokuskesini, ini 30 foto pilihanku:&#10;UPM07959.JPG&#10;UPM07946.JPG..."
+              class="w-full p-3 text-xs font-mono rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-foreground"
+            ></textarea>
+            <div class="flex justify-end gap-2">
+              <button
+                type="button"
+                @click="importFromWhatsappText"
+                :disabled="importingText || !importRawText.trim()"
+                class="px-4 py-2.5 rounded-xl bg-foreground text-background hover:bg-foreground/90 text-xs font-bold disabled:opacity-50 min-h-[40px] flex items-center gap-2"
+              >
+                <span v-if="importingText" class="w-3.5 h-3.5 border-2 border-background border-t-transparent rounded-full animate-spin"></span>
+                <span>{{ importingText ? 'Mencocokkan dengan Drive...' : 'Cocokkan Drive & Simpan' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div v-if="selectedPhotosList.length === 0" class="py-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground space-y-3">
+            <p>{{ importingText ? 'Sedang mencocokkan daftar foto dengan Google Drive...' : 'Klien belum mengirimkan daftar foto pilihan pada proyek ini.' }}</p>
+            <button
+              v-if="!showImportBox && !importingText"
+              type="button"
+              @click="showImportBox = true"
+              class="px-4 py-2 rounded-xl border border-border bg-background hover:bg-muted text-xs font-medium text-foreground"
+            >
+              Tempel Daftar Foto dari Chat WA
+            </button>
           </div>
 
           <template v-else>
@@ -521,6 +561,40 @@ const completionForm = ref({
 const copied = ref(false)
 const copiedMode = ref('')
 const unlockingSelection = ref(false)
+const showImportBox = ref(false)
+const importRawText = ref('')
+const importingText = ref(false)
+
+const IZA_PRESET_PHOTOS = `UPM07959.JPG
+UPM07946.JPG
+UPM07943.JPG
+UPM07950.JPG
+UPM07942.JPG
+UPM07938.JPG
+UPM07934.JPG
+UPM07916.JPG
+UPM07910.JPG
+UPM07904.JPG
+UPM07900.JPG
+UPM07884.JPG
+UPM07870.JPG
+UPM07837.JPG
+UPM07827.JPG
+UPM07792.JPG
+UPM07768.JPG
+UPM07760.JPG
+UPM07755.JPG
+UPM07748.JPG
+UPM07957.JPG
+UPM07961.JPG
+UPM07932.JPG
+UPM07779.JPG
+UPM07803.JPG
+UPM07908.JPG
+UPM07958.JPG
+UPM07931.JPG
+UPM07831.JPG
+UPM07745.JPG`
 const zipProgress = ref({
   active: false,
   completed: 0,
@@ -619,6 +693,19 @@ const fetchOrderDetails = async () => {
       }
     }
     tasks.value = allTasks.filter(t => t.category !== '__SELECTION__')
+
+    // Auto-import Iza's 30 photos if this is order "Iza" and selection list is still empty
+    const hasExistingSelection =
+      (Array.isArray(orderData.selected_photos) && orderData.selected_photos.length > 0) ||
+      fallbackSelectedPhotos.value.length > 0
+    if (
+      !hasExistingSelection &&
+      orderData.client_name &&
+      orderData.client_name.trim().toLowerCase() === 'iza'
+    ) {
+      importRawText.value = IZA_PRESET_PHOTOS
+      importFromWhatsappText(true)
+    }
 
     // Fetch Finances
     const { data: financeDataResult, error: financeError } = await supabase
@@ -867,6 +954,42 @@ const downloadSelectedForEditing = async () => {
 
 const cancelAdminZip = () => {
   if (adminZipAbort) adminZipAbort.abort()
+}
+
+const importFromWhatsappText = async (silent = false) => {
+  if (!importRawText.value.trim() || importingText.value) return
+  importingText.value = true
+  try {
+    const res = await $fetch(`/api/selection/${orderId}`, {
+      method: 'POST',
+      body: {
+        action: 'import_text',
+        raw_text: importRawText.value
+      }
+    })
+    if (res?.success && Array.isArray(res.selected_photos)) {
+      if (order.value) {
+        order.value.selected_photos = res.selected_photos
+        order.value.selection_locked = true
+      }
+      fallbackSelectedPhotos.value = res.selected_photos
+      fallbackSelectionLocked.value = true
+      showImportBox.value = false
+      if (!silent) {
+        const unmatchedInfo =
+          Array.isArray(res.unmatched) && res.unmatched.length > 0
+            ? `\n(Tidak ditemukan di Drive: ${res.unmatched.join(', ')})`
+            : ''
+        alert(`Berhasil mencocokkan & menyimpan ${res.selected_photos.length} foto dari Google Drive!${unmatchedInfo}`)
+      }
+    }
+  } catch (err) {
+    if (!silent) {
+      alert('Gagal mengimpor daftar foto: ' + (err?.data?.statusMessage || err.message))
+    }
+  } finally {
+    importingText.value = false
+  }
 }
 
 const unlockClientSelection = async () => {
